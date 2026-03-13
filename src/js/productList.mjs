@@ -2,9 +2,9 @@ import { getData } from './productData.mjs';
 
 function productCardTemplate(product) {
   return `<li class="product-card">
-    <a href="product_pages/index.html?product=${product.Id}">
+    <a href="../product_pages/index.html?product=${product.Id}">
       <img
-        src="${product.Image.replace('..', '')}"
+        src="${product.Images.PrimaryMedium}"
         alt="${product.Name}"
       />
       <h3 class="card__brand">${product.Brand.Name}</h3>
@@ -19,15 +19,8 @@ function renderList(products, element) {
   element.innerHTML = htmlStrings.join('');
 }
 
-function filterProducts(products) {
-  return products.filter((product) =>
-    ['880RR', '985RF', '985PR', '344YJ'].includes(product.Id),
-  );
-}
-
 export default async function productList(selector, category) {
   const element = document.querySelector(selector);
   const products = await getData(category);
-  const filteredProducts = filterProducts(products);
-  renderList(filteredProducts, element);
+  renderList(products, element);
 }

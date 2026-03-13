@@ -1,17 +1,27 @@
-function convertToJson(res) {
+const baseURL = import.meta.env.VITE_SERVER_URL;
+console.log('baseURL:', baseURL);
+
+async function convertToJson(res) {
   if (res.ok) {
     return res.json();
   }
   throw new Error('Bad Response');
 }
 
-export function getData(category = 'tents') {
-  return fetch(`/json/${category}.json`)
-    .then(convertToJson)
-    .then((data) => data.Result || data);
+export async function getData(category = 'tents') {
+  const url = baseURL + `products/search/${category}`;
+  console.log('fetching:', url);
+
+  const response = await fetch(url);
+  const data = await convertToJson(response);
+  return data.Result;
 }
 
 export async function findProductById(id) {
-  const products = await getData();
-  return products.find((item) => item.Id === id);
+  const url = baseURL + `product/${id}`;
+  console.log('fetching:', url);
+
+  const response = await fetch(url);
+  const data = await convertToJson(response);
+  return data.Result;
 }
