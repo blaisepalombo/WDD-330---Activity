@@ -5,8 +5,9 @@ let product = {};
 
 function renderProductDetails() {
   document.querySelector('#productName').textContent = product.Brand.Name;
-  document.querySelector('#productNameWithoutBrand').textContent = product.Name;
-  document.querySelector('#productImage').src = product.Images.PrimaryLarge;
+  document.querySelector('#productNameWithoutBrand').textContent =
+    product.NameWithoutBrand;
+  document.querySelector('#productImage').src = product.Image.replace('..', '');
   document.querySelector('#productImage').alt = product.Name;
   document.querySelector('#productFinalPrice').textContent =
     `$${product.FinalPrice}`;
