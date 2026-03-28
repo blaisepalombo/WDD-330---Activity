@@ -16,6 +16,12 @@ const form = document.querySelector("#checkout-form");
 if (form) {
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    await checkoutProcess.checkout(form);
+
+    const result = await checkoutProcess.checkout(form);
+
+    if (result?.message === "Order Placed") {
+      alert("Order placed successfully!");
+      window.location.href = "../cart/";
+    }
   });
 }

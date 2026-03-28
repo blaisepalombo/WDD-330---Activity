@@ -1,5 +1,10 @@
 import { getLocalStorage, loadHeaderFooter } from "./utils.mjs";
 
+function fixImageUrl(url) {
+  if (!url) return "";
+  return url.replace("http://server-nodejs.cit.byui.edu:3000", "/api");
+}
+
 function renderCartContents() {
   const cartItems = getLocalStorage("so-cart") || [];
   const htmlItems = cartItems.map((item) => cartItemTemplate(item));
@@ -17,11 +22,11 @@ function renderCartTotal(cartItems) {
 
 function getItemImage(item) {
   if (item.Images?.PrimaryMedium) {
-    return item.Images.PrimaryMedium;
+    return fixImageUrl(item.Images.PrimaryMedium);
   }
 
   if (item.Image) {
-    return item.Image.replace("..", "");
+    return fixImageUrl(item.Image.replace("..", ""));
   }
 
   return "/images/tent.svg";

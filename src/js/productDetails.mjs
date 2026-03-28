@@ -3,11 +3,16 @@ import { getLocalStorage, setLocalStorage } from "./utils.mjs";
 
 let product = {};
 
+function fixImageUrl(url) {
+  if (!url) return "";
+  return url.replace("http://server-nodejs.cit.byui.edu:3000", "/api");
+}
+
 function renderProductDetails() {
   document.querySelector("#productName").textContent = product.Brand.Name;
   document.querySelector("#productNameWithoutBrand").textContent =
     product.NameWithoutBrand;
-  document.querySelector("#productImage").src = product.Images.PrimaryLarge;
+  document.querySelector("#productImage").src = fixImageUrl(product.Images.PrimaryLarge);
   document.querySelector("#productImage").alt = product.Name;
   document.querySelector("#productFinalPrice").textContent =
     `$${product.FinalPrice}`;

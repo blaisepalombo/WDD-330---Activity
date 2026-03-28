@@ -1,10 +1,15 @@
 import externalServices from "./externalServices.mjs";
 
+function fixImageUrl(url) {
+  if (!url) return "";
+  return url.replace("http://server-nodejs.cit.byui.edu:3000", "/api");
+}
+
 function productCardTemplate(product) {
   return `<li class="product-card">
     <a href="../product_pages/index.html?product=${product.Id}">
       <img
-        src="${product.Images.PrimaryMedium}"
+        src="${fixImageUrl(product.Images.PrimaryMedium)}"
         alt="${product.Name}"
       />
       <h3 class="card__brand">${product.Brand.Name}</h3>

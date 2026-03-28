@@ -72,6 +72,21 @@ const checkoutProcess = {
       this.orderTotal.toFixed(2);
   },
 
+  clearOrder() {
+    this.items = [];
+    this.subtotal = 0;
+    this.shipping = 0;
+    this.tax = 0;
+    this.orderTotal = 0;
+
+    setLocalStorage(this.key, []);
+
+    document.querySelector(`${this.outputSelector} #item-subtotal`).textContent = "0.00";
+    document.querySelector(`${this.outputSelector} #shipping`).textContent = "0.00";
+    document.querySelector(`${this.outputSelector} #tax`).textContent = "0.00";
+    document.querySelector(`${this.outputSelector} #order-total`).textContent = "0.00";
+  },
+
   async checkout(form) {
     const formData = new FormData(form);
 
@@ -94,7 +109,10 @@ const checkoutProcess = {
 
     const result = await externalServices.checkout(orderData);
     console.log(result);
-    setLocalStorage(this.key, []);
+
+    this.clearOrder();
+    form.reset();
+
     return result;
   }
 };
