@@ -33,7 +33,7 @@ function productCardTemplate(product, category) {
         href="../product_pages/index.html?product=${product.Id}&category=${category}"
       >
         <img
-          src="${fixImageUrl(product.Images.PrimaryMedium)}"
+          src="${fixImageUrl(product.Images.PrimaryLarge)}"
           alt="${product.Name}"
         />
         <h3 class="card__brand">${product.Brand.Name}</h3>
@@ -45,6 +45,7 @@ function productCardTemplate(product, category) {
         }
         <p class="product-card__price">$${product.FinalPrice}</p>
       </a>
+
       <div class="product-card__actions">
         <button
           class="quick-view-button"
@@ -58,55 +59,14 @@ function productCardTemplate(product, category) {
   `;
 }
 
-function renderList(products, element, category) {
+export function renderProductList(selector, products, category) {
+  const element = document.querySelector(selector);
+  if (!element) return;
+
   const htmlStrings = products.map((product) =>
     productCardTemplate(product, category)
   );
   element.innerHTML = htmlStrings.join("");
-}
-
-function quickViewTemplate(product, category) {
-  const discount = getDiscount(product);
-  const colorName = product.Colors?.[0]?.ColorName || "Color not listed";
-
-  return `
-    <div class="quick-view-product">
-      <div class="quick-view-product__image">
-        <img
-          src="${fixImageUrl(
-            product.Images.PrimaryLarge || product.Images.PrimaryMedium
-          )}"
-          alt="${product.Name}"
-        />
-      </div>
-
-      <div class="quick-view-product__details">
-        <p class="quick-view-product__brand">${product.Brand.Name}</p>
-        <h2 class="quick-view-product__name" id="quickViewTitle">
-          ${product.NameWithoutBrand}
-        </h2>
-
-        ${
-          discount
-            ? `<p class="discount-tag discount-tag-detail">Save $${discount.amountOff} (${discount.percentOff}% off)</p>`
-            : ""
-        }
-
-        <p class="product-card__price quick-view-product__price">$${product.FinalPrice}</p>
-        <p class="quick-view-product__color">${colorName}</p>
-        <div class="quick-view-product__description">
-          ${product.DescriptionHtmlSimple || ""}
-        </div>
-
-        <a
-          class="button-link quick-view-product__link"
-          href="../product_pages/index.html?product=${product.Id}&category=${category}"
-        >
-          View Full Details
-        </a>
-      </div>
-    </div>
-  `;
 }
 
 function setupQuickView(listElement, category) {
@@ -118,58 +78,50 @@ function setupQuickView(listElement, category) {
 
   function closeModal() {
     modal.hidden = true;
-    modal.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("modal-open");
     modalContent.innerHTML = "";
   }
 
   async function openModal(productId) {
     modal.hidden = false;
-    modal.setAttribute("aria-hidden", "false");
-    document.body.classList.add("modal-open");
-    modalContent.innerHTML =
-      `<p class="quick-view-loading">Loading product details...</p>`;
+    modalContent.innerHTML = "Loading...";
 
-    try {
-      const product = await externalServices.findProductById(productId);
-      modalContent.innerHTML = quickViewTemplate(product, category);
-    } catch (error) {
-      modalContent.innerHTML = `
-        <div class="product-error-card">
-          <h2 id="quickViewTitle">Unable to load product details.</h2>
-          <p>Please try again.</p>
-        </div>
-      `;
-    }
+    const product = await externalServices.findProductById(productId);
+
+    modalContent.innerHTML = `
+      <h2>${product.NameWithoutBrand}</h2>
+      <img src="${fixImageUrl(product.Images.PrimaryLarge)}" alt="${product.Name}" />
+      <p>$${product.FinalPrice}</p>
+      <p>${product.DescriptionHtmlSimple}</p>
+
+      <a
+        class="button-link"
+        href="../product_pages/index.html?product=${product.Id}&category=${category}"
+      >
+        View Full Details
+      </a>
+    `;
   }
 
   listElement.addEventListener("click", async (event) => {
-    const quickViewButton = event.target.closest(".quick-view-button");
-    if (!quickViewButton) return;
+    const btn = event.target.closest(".quick-view-button");
+    if (!btn) return;
 
-    event.preventDefault();
-    await openModal(quickViewButton.dataset.productId);
+    await openModal(btn.dataset.productId);
   });
 
   closeButton.addEventListener("click", closeModal);
 
   modal.addEventListener("click", (event) => {
-    if (event.target === modal) {
-      closeModal();
-    }
-  });
-
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !modal.hidden) {
-      closeModal();
-    }
+    if (event.target === modal) closeModal();
   });
 }
 
 export default async function productList(selector, category) {
   const element = document.querySelector(selector);
   const products = await externalServices.getProductsByCategory(category);
-  renderList(products, element, category);
+
+  renderProductList(selector, products, category);
   setupQuickView(element, category);
+
   return products;
 }

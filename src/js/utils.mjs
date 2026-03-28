@@ -111,7 +111,10 @@ export function alertMessage(message, scroll = true) {
 
 export function updateCartCount() {
   const cartItems = getLocalStorage("so-cart") || [];
-  const count = cartItems.length;
+  const count = cartItems.reduce(
+    (total, item) => total + Number(item.quantity || 1),
+    0
+  );
 
   const cartLink = document.querySelector(".cart");
   if (!cartLink) return;

@@ -13,9 +13,11 @@ function fixImageUrl(url) {
   return url.replace("http://server-nodejs.cit.byui.edu:3000", "/api");
 }
 
-function getDiscount(product) {
-  const original = Number(product.SuggestedRetailPrice);
-  const sale = Number(product.FinalPrice);
+function getDiscount(productToCheck) {
+  const original = Number(
+    productToCheck.SuggestedRetailPrice || productToCheck.ListPrice
+  );
+  const sale = Number(productToCheck.FinalPrice);
 
   if (!original || sale >= original) {
     return null;
@@ -33,7 +35,19 @@ function getDiscount(product) {
 
 function addProductToCart(productToAdd) {
   const cartItems = getLocalStorage("so-cart") || [];
-  cartItems.push(productToAdd);
+
+  const existingIndex = cartItems.findIndex(
+    (item) => item.Id === productToAdd.Id
+  );
+
+  if (existingIndex !== -1) {
+    const currentQty = Number(cartItems[existingIndex].quantity) || 1;
+    cartItems[existingIndex].quantity = currentQty + 1;
+  } else {
+    const newItem = { ...productToAdd, quantity: 1 };
+    cartItems.push(newItem);
+  }
+
   setLocalStorage("so-cart", cartItems);
 }
 
@@ -47,73 +61,43 @@ function renderProductDetails() {
   document.querySelector("#productName").textContent = product.Brand.Name;
   document.querySelector("#productNameWithoutBrand").textContent =
     product.NameWithoutBrand;
-  document.querySelector("#productImage").src = fixImageUrl(
-    product.Images.PrimaryLarge
+
+  const img = document.querySelector("#productImage");
+  img.src = fixImageUrl(
+    product.Images.PrimaryExtraLarge || product.Images.PrimaryLarge
   );
-  document.querySelector("#productImage").alt = product.Name;
+  img.alt = product.Name;
+
   document.querySelector("#productFinalPrice").textContent =
-    `$${product.FinalPrice}`;
+    `$${Number(product.FinalPrice).toFixed(2)}`;
+
   document.querySelector("#productColorName").textContent =
     product.Colors?.[0]?.ColorName || "";
+
   document.querySelector("#productDescriptionHtmlSimple").innerHTML =
     product.DescriptionHtmlSimple;
 
-  const discount = getDiscount(product);
-  let discountElement = document.querySelector("#productDiscount");
+  const discountElement = document.querySelector("#productDiscount");
+  if (discountElement) {
+    const discount = getDiscount(product);
 
-  if (!discountElement) {
-    discountElement = document.createElement("p");
-    discountElement.id = "productDiscount";
-    discountElement.classList.add("discount-tag", "discount-tag-detail");
-
-    const priceElement = document.querySelector("#productFinalPrice");
-    priceElement.insertAdjacentElement("afterend", discountElement);
-  }
-
-  if (discount) {
-    discountElement.textContent =
-      `Save $${discount.amountOff} (${discount.percentOff}% off) • Was $${discount.original}`;
-    discountElement.style.display = "inline-block";
-  } else {
-    discountElement.style.display = "none";
+    if (discount) {
+      discountElement.className = "discount-tag discount-tag-detail";
+      discountElement.textContent =
+        `Save $${discount.amountOff} (${discount.percentOff}% off) • Was $${discount.original}`;
+      discountElement.style.display = "inline-block";
+    } else {
+      discountElement.textContent = "";
+      discountElement.className = "";
+      discountElement.style.display = "none";
+    }
   }
 
   const addButton = document.querySelector("#addToCart");
-  addButton.dataset.id = product.Id;
-  addButton.style.display = "block";
-}
-
-function renderProductNotFound() {
-  const detail = document.querySelector(".product-detail");
-  if (!detail) return;
-
-  detail.innerHTML = `
-    <div class="product-error-card">
-      <h2>Sorry, we couldn't find that product.</h2>
-      <p>
-        The link may be wrong, outdated, or the product may no longer be available.
-      </p>
-      <a class="button-link" href="/index.html">Back to shopping</a>
-    </div>
-  `;
+  addButton.addEventListener("click", addToCart);
 }
 
 export default async function productDetails(productId) {
-  try {
-    product = await externalServices.findProductById(productId);
-
-    if (!product || !product.Id) {
-      renderProductNotFound();
-      return;
-    }
-
-    renderProductDetails();
-
-    const addButton = document.querySelector("#addToCart");
-    if (addButton) {
-      addButton.addEventListener("click", addToCart);
-    }
-  } catch (err) {
-    renderProductNotFound();
-  }
+  product = await externalServices.findProductById(productId);
+  renderProductDetails();
 }

@@ -10,19 +10,31 @@
   <body>
     <header class="divider" id="main-header"></header>
 
-    <!-- Breadcrumb -->
     <div class="breadcrumb-wrapper">
       <p class="breadcrumb" id="breadcrumb"></p>
     </div>
 
     <main class="divider">
       <section class="products">
-        <h2 class="page-title">Top Products</h2>
+        <div class="products-header">
+          <h2 class="page-title">Top Products</h2>
+
+          <label class="sort-label" for="sortProducts">
+            Sort by:
+            <select id="sortProducts">
+              <option value="default">Featured</option>
+              <option value="name-asc">Name (A-Z)</option>
+              <option value="name-desc">Name (Z-A)</option>
+              <option value="price-asc">Price (Low to High)</option>
+              <option value="price-desc">Price (High to Low)</option>
+            </select>
+          </label>
+        </div>
+
         <ul class="product-list"></ul>
       </section>
     </main>
 
-    <!-- Quick View Modal (unchanged) -->
     <div
       class="quick-view-modal"
       id="quickViewModal"

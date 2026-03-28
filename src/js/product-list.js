@@ -1,4 +1,4 @@
-import productList from "./productList.mjs";
+import productList, { renderProductList } from "./productList.mjs";
 import { getParam, loadHeaderFooter, updateCartCount } from "./utils.mjs";
 
 function formatCategory(category) {
@@ -16,11 +16,43 @@ function updateBreadcrumb(category, count) {
   el.textContent = `${formatCategory(category)} -> (${count} ${label})`;
 }
 
+function sortProducts(products, sortValue) {
+  const sortedProducts = [...products];
+
+  switch (sortValue) {
+    case "name-asc":
+      sortedProducts.sort((a, b) =>
+        a.NameWithoutBrand.localeCompare(b.NameWithoutBrand)
+      );
+      break;
+
+    case "name-desc":
+      sortedProducts.sort((a, b) =>
+        b.NameWithoutBrand.localeCompare(a.NameWithoutBrand)
+      );
+      break;
+
+    case "price-asc":
+      sortedProducts.sort((a, b) => Number(a.FinalPrice) - Number(b.FinalPrice));
+      break;
+
+    case "price-desc":
+      sortedProducts.sort((a, b) => Number(b.FinalPrice) - Number(a.FinalPrice));
+      break;
+
+    default:
+      break;
+  }
+
+  return sortedProducts;
+}
+
 async function init() {
   await loadHeaderFooter();
   updateCartCount();
 
   const category = getParam("category") || "tents";
+  const sortSelect = document.querySelector("#sortProducts");
 
   const products = await productList(".product-list", category);
 
@@ -30,6 +62,13 @@ async function init() {
   }
 
   updateBreadcrumb(category, products.length);
+
+  if (sortSelect) {
+    sortSelect.addEventListener("change", () => {
+      const sortedProducts = sortProducts(products, sortSelect.value);
+      renderProductList(".product-list", sortedProducts, category);
+    });
+  }
 }
 
 init();

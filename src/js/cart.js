@@ -35,13 +35,49 @@ function removeFromCart(productId) {
   updateCartCount();
 }
 
-function addRemoveListeners() {
+function changeQuantity(productId, amount) {
+  const cartItems = getLocalStorage("so-cart") || [];
+  const itemIndex = cartItems.findIndex((item) => item.Id === productId);
+
+  if (itemIndex === -1) return;
+
+  const currentQty = Number(cartItems[itemIndex].quantity || 1);
+  const newQty = currentQty + amount;
+
+  if (newQty <= 0) {
+    cartItems.splice(itemIndex, 1);
+  } else {
+    cartItems[itemIndex].quantity = newQty;
+  }
+
+  setLocalStorage("so-cart", cartItems);
+  renderCartContents();
+  updateCartCount();
+}
+
+function addCartActionListeners() {
   const removeButtons = document.querySelectorAll(".remove-item");
+  const decreaseButtons = document.querySelectorAll(".quantity-decrease");
+  const increaseButtons = document.querySelectorAll(".quantity-increase");
 
   removeButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const productId = button.dataset.id;
       removeFromCart(productId);
+    });
+  });
+
+  decreaseButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const productId = button.dataset.id;
+      changeQuantity(productId, -1);
+    });
+  });
+
+  increaseButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const productId = button.dataset.id;
+      changeQuantity(productId, 1);
     });
   });
 }
@@ -58,25 +94,58 @@ function renderCartTotal(cartItems) {
     return;
   }
 
-  const total = cartItems.reduce((sum, item) => sum + Number(item.FinalPrice), 0);
+  const total = cartItems.reduce(
+    (sum, item) => sum + Number(item.FinalPrice) * Number(item.quantity || 1),
+    0
+  );
 
   totalElement.textContent = total.toFixed(2);
   cartFooter.classList.remove("hide");
 }
 
 function cartItemTemplate(item) {
+  const qty = Number(item.quantity || 1);
+  const itemPrice = Number(item.FinalPrice).toFixed(2);
+  const lineTotal = (Number(item.FinalPrice) * qty).toFixed(2);
+
   return `
     <li class="cart-card divider">
       <button class="remove-item" data-id="${item.Id}" aria-label="Remove ${item.Name}">×</button>
+
       <a href="../product_pages/index.html?product=${item.Id}" class="cart-card__image">
         <img src="${getItemImage(item)}" alt="${item.Name}" />
       </a>
+
       <a href="../product_pages/index.html?product=${item.Id}">
         <h2 class="card__name">${item.Name}</h2>
       </a>
+
       <p class="cart-card__color">${item.Colors?.[0]?.ColorName || ""}</p>
-      <p class="cart-card__quantity">qty: 1</p>
-      <p class="cart-card__price">$${item.FinalPrice}</p>
+
+      <div class="cart-card__quantity">
+        <button
+          class="quantity-button quantity-decrease"
+          data-id="${item.Id}"
+          aria-label="Decrease quantity of ${item.Name}"
+          type="button"
+        >
+          −
+        </button>
+        <span class="quantity-value">qty: ${qty}</span>
+        <button
+          class="quantity-button quantity-increase"
+          data-id="${item.Id}"
+          aria-label="Increase quantity of ${item.Name}"
+          type="button"
+        >
+          +
+        </button>
+      </div>
+
+      <p class="cart-card__price">
+        $${itemPrice} each<br />
+        <strong>Total: $${lineTotal}</strong>
+      </p>
     </li>
   `;
 }
@@ -97,7 +166,7 @@ function renderCartContents() {
   productList.innerHTML = htmlItems.join("");
 
   renderCartTotal(cartItems);
-  addRemoveListeners();
+  addCartActionListeners();
 }
 
 async function init() {
