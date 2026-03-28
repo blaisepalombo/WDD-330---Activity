@@ -22,11 +22,11 @@ export function setLocalStorage(key, data) {
 
 // set a listener for both touchend and click
 export function setClick(selector, callback) {
-  qs(selector).addEventListener('touchend', (event) => {
+  qs(selector).addEventListener("touchend", (event) => {
     event.preventDefault();
     callback();
   });
-  qs(selector).addEventListener('click', callback);
+  qs(selector).addEventListener("click", callback);
 }
 
 export async function renderWithTemplate(
@@ -34,13 +34,13 @@ export async function renderWithTemplate(
   parentElement,
   data = {},
   callback,
-  position = 'afterbegin',
-  clear = true,
+  position = "afterbegin",
+  clear = true
 ) {
   const template = await templateFn(data);
 
   if (clear) {
-    parentElement.innerHTML = '';
+    parentElement.innerHTML = "";
   }
 
   parentElement.insertAdjacentHTML(position, template);
@@ -62,11 +62,11 @@ export function loadTemplate(path) {
 }
 
 export async function loadHeaderFooter() {
-  const headerTemplate = loadTemplate('/partials/header.html');
-  const footerTemplate = loadTemplate('/partials/footer.html');
+  const headerTemplate = loadTemplate("/partials/header.html");
+  const footerTemplate = loadTemplate("/partials/footer.html");
 
-  const headerElement = document.querySelector('#main-header');
-  const footerElement = document.querySelector('#main-footer');
+  const headerElement = document.querySelector("#main-header");
+  const footerElement = document.querySelector("#main-footer");
 
   if (headerElement) {
     await renderWithTemplate(headerTemplate, headerElement);
@@ -74,5 +74,37 @@ export async function loadHeaderFooter() {
 
   if (footerElement) {
     await renderWithTemplate(footerTemplate, footerElement);
+  }
+}
+
+export function alertMessage(message, scroll = true) {
+  const main = document.querySelector("main");
+  if (!main) return;
+
+  const existingAlert = main.querySelector(".alert");
+  if (existingAlert) {
+    existingAlert.remove();
+  }
+
+  const alert = document.createElement("div");
+  alert.classList.add("alert");
+  alert.innerHTML = `
+    <p>${message}</p>
+    <span class="alert-close" aria-label="Close alert">X</span>
+  `;
+
+  alert.addEventListener("click", function (e) {
+    if (
+      e.target.classList.contains("alert-close") ||
+      e.target.tagName === "SPAN"
+    ) {
+      this.remove();
+    }
+  });
+
+  main.prepend(alert);
+
+  if (scroll) {
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   }
 }

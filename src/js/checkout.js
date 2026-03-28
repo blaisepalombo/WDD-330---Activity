@@ -17,11 +17,11 @@ if (form) {
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const result = await checkoutProcess.checkout(form);
+    const isValid = form.checkValidity();
+    form.reportValidity();
 
-    if (result?.message === "Order Placed") {
-      alert("Order placed successfully!");
-      window.location.href = "../cart/";
+    if (isValid) {
+      await checkoutProcess.checkout(form);
     }
   });
 }

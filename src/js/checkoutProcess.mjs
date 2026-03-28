@@ -1,5 +1,5 @@
 import externalServices from "./externalServices.mjs";
-import { getLocalStorage, setLocalStorage } from "./utils.mjs";
+import { alertMessage, getLocalStorage, setLocalStorage } from "./utils.mjs";
 
 function calculateItemSubtotal(items) {
   return items.reduce((sum, item) => sum + Number(item.FinalPrice), 0);
@@ -37,6 +37,32 @@ function packageItems(items) {
   return packagedItems;
 }
 
+function getErrorMessage(error) {
+  const serverMessage = error?.message;
+
+  if (typeof serverMessage === "string") {
+    return serverMessage;
+  }
+
+  if (Array.isArray(serverMessage)) {
+    return serverMessage.join(", ");
+  }
+
+  if (serverMessage?.message) {
+    return serverMessage.message;
+  }
+
+  if (serverMessage?.error) {
+    return serverMessage.error;
+  }
+
+  if (Array.isArray(serverMessage?.errors) && serverMessage.errors.length) {
+    return serverMessage.errors.map((item) => item.message || item).join(", ");
+  }
+
+  return "Something went wrong while placing your order. Please check your information and try again.";
+}
+
 const checkoutProcess = {
   key: "",
   outputSelector: "",
@@ -51,6 +77,7 @@ const checkoutProcess = {
     this.outputSelector = outputSelector;
     this.items = getLocalStorage(this.key) || [];
     this.calculateAndDisplaySubtotal();
+    this.calculateAndDisplayOrderTotals();
   },
 
   calculateAndDisplaySubtotal() {
@@ -81,10 +108,13 @@ const checkoutProcess = {
 
     setLocalStorage(this.key, []);
 
-    document.querySelector(`${this.outputSelector} #item-subtotal`).textContent = "0.00";
-    document.querySelector(`${this.outputSelector} #shipping`).textContent = "0.00";
+    document.querySelector(`${this.outputSelector} #item-subtotal`).textContent =
+      "0.00";
+    document.querySelector(`${this.outputSelector} #shipping`).textContent =
+      "0.00";
     document.querySelector(`${this.outputSelector} #tax`).textContent = "0.00";
-    document.querySelector(`${this.outputSelector} #order-total`).textContent = "0.00";
+    document.querySelector(`${this.outputSelector} #order-total`).textContent =
+      "0.00";
   },
 
   async checkout(form) {
@@ -107,13 +137,18 @@ const checkoutProcess = {
       tax: this.tax.toFixed(2)
     };
 
-    const result = await externalServices.checkout(orderData);
-    console.log(result);
+    try {
+      const result = await externalServices.checkout(orderData);
 
-    this.clearOrder();
-    form.reset();
+      this.clearOrder();
+      form.reset();
+      window.location.href = "/checkout/success.html";
 
-    return result;
+      return result;
+    } catch (err) {
+      alertMessage(getErrorMessage(err));
+      return null;
+    }
   }
 };
 

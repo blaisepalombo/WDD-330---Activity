@@ -1,10 +1,16 @@
 const baseURL = "/api/";
 
 async function convertToJson(res) {
+  const jsonResponse = await res.json();
+
   if (res.ok) {
-    return res.json();
+    return jsonResponse;
   }
-  throw new Error("Bad Response");
+
+  throw {
+    name: "servicesError",
+    message: jsonResponse
+  };
 }
 
 async function getProductsByCategory(category = "tents") {

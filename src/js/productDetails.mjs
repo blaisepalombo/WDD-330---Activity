@@ -1,5 +1,5 @@
 import externalServices from "./externalServices.mjs";
-import { getLocalStorage, setLocalStorage } from "./utils.mjs";
+import { alertMessage, getLocalStorage, setLocalStorage } from "./utils.mjs";
 
 let product = {};
 
@@ -31,6 +31,7 @@ function addProductToCart(productToAdd) {
 
 function addToCart() {
   addProductToCart(product);
+  alertMessage(`${product.Name} was added to your cart.`, false);
 }
 
 export default async function productDetails(productId) {

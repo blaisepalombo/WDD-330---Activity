@@ -33,10 +33,26 @@
               <input type="text" id="city" name="city" required />
 
               <label for="state">State</label>
-              <input type="text" id="state" name="state" required />
+              <input
+                type="text"
+                id="state"
+                name="state"
+                minlength="2"
+                maxlength="2"
+                placeholder="ID"
+                required
+              />
 
               <label for="zip">Zip Code</label>
-              <input type="text" id="zip" name="zip" required />
+              <input
+                type="text"
+                id="zip"
+                name="zip"
+                inputmode="numeric"
+                pattern="[0-9]{5}"
+                placeholder="83440"
+                required
+              />
             </fieldset>
 
             <fieldset>
@@ -47,17 +63,35 @@
                 type="text"
                 id="cardNumber"
                 name="cardNumber"
+                inputmode="numeric"
+                pattern="[0-9]{16}"
+                placeholder="1234123412341234"
                 required
               />
 
               <label for="expiration">Expiration</label>
-              <input type="text" id="expiration" name="expiration" required />
+              <input
+                type="text"
+                id="expiration"
+                name="expiration"
+                pattern="^(0[1-9]|1[0-2])\/([0-9]{2})$"
+                placeholder="MM/YY"
+                required
+              />
 
               <label for="code">Security Code</label>
-              <input type="text" id="code" name="code" required />
+              <input
+                type="text"
+                id="code"
+                name="code"
+                inputmode="numeric"
+                pattern="[0-9]{3,4}"
+                placeholder="123"
+                required
+              />
             </fieldset>
 
-            <button type="submit">Place Order</button>
+            <button type="submit" id="checkoutSubmit">Place Order</button>
           </form>
 
           <section id="order-summary" class="order-summary">
