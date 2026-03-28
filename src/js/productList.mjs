@@ -5,7 +5,26 @@ function fixImageUrl(url) {
   return url.replace("http://server-nodejs.cit.byui.edu:3000", "/api");
 }
 
+function getDiscount(product) {
+  const original = Number(product.SuggestedRetailPrice);
+  const sale = Number(product.FinalPrice);
+
+  if (!original || sale >= original) {
+    return null;
+  }
+
+  const amountOff = original - sale;
+  const percentOff = Math.round((amountOff / original) * 100);
+
+  return {
+    amountOff: amountOff.toFixed(2),
+    percentOff
+  };
+}
+
 function productCardTemplate(product) {
+  const discount = getDiscount(product);
+
   return `<li class="product-card">
     <a href="../product_pages/index.html?product=${product.Id}">
       <img
@@ -14,6 +33,11 @@ function productCardTemplate(product) {
       />
       <h3 class="card__brand">${product.Brand.Name}</h3>
       <h2 class="card__name">${product.NameWithoutBrand}</h2>
+      ${
+        discount
+          ? `<p class="discount-tag">Save $${discount.amountOff} (${discount.percentOff}% off)</p>`
+          : ""
+      }
       <p class="product-card__price">$${product.FinalPrice}</p>
     </a>
   </li>`;

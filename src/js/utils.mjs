@@ -108,3 +108,45 @@ export function alertMessage(message, scroll = true) {
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   }
 }
+
+export function updateCartCount() {
+  const cartItems = getLocalStorage("so-cart") || [];
+  const count = cartItems.length;
+
+  const cartLink = document.querySelector(".cart");
+  if (!cartLink) return;
+
+  let badge = cartLink.querySelector(".cart-count");
+
+  if (!badge) {
+    badge = document.createElement("span");
+    badge.classList.add("cart-count");
+    cartLink.appendChild(badge);
+  }
+
+  if (count > 0) {
+    badge.textContent = count;
+    badge.style.display = "flex";
+  } else {
+    badge.style.display = "none";
+  }
+}
+
+export function animateCartIcon() {
+  const cartLink = document.querySelector(".cart");
+  if (!cartLink) return;
+
+  cartLink.classList.remove("cart-animate");
+
+  void cartLink.offsetWidth;
+
+  cartLink.classList.add("cart-animate");
+
+  cartLink.addEventListener(
+    "animationend",
+    () => {
+      cartLink.classList.remove("cart-animate");
+    },
+    { once: true }
+  );
+}

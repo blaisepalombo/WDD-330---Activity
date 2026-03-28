@@ -1,5 +1,10 @@
-import { loadHeaderFooter } from "./utils.mjs";
+import { loadHeaderFooter, updateCartCount } from "./utils.mjs";
 import loadAlerts from "./alert.js";
 
-loadHeaderFooter();
-loadAlerts();
+async function init() {
+  await loadHeaderFooter();
+  updateCartCount();
+  loadAlerts();
+}
+
+init();

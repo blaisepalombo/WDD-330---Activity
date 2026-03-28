@@ -1,11 +1,34 @@
 import externalServices from "./externalServices.mjs";
-import { getLocalStorage, setLocalStorage } from "./utils.mjs";
+import {
+  getLocalStorage,
+  setLocalStorage,
+  updateCartCount,
+  animateCartIcon
+} from "./utils.mjs";
 
 let product = {};
 
 function fixImageUrl(url) {
   if (!url) return "";
   return url.replace("http://server-nodejs.cit.byui.edu:3000", "/api");
+}
+
+function getDiscount(product) {
+  const original = Number(product.SuggestedRetailPrice);
+  const sale = Number(product.FinalPrice);
+
+  if (!original || sale >= original) {
+    return null;
+  }
+
+  const amountOff = original - sale;
+  const percentOff = Math.round((amountOff / original) * 100);
+
+  return {
+    amountOff: amountOff.toFixed(2),
+    percentOff,
+    original: original.toFixed(2)
+  };
 }
 
 function addProductToCart(productToAdd) {
@@ -16,6 +39,8 @@ function addProductToCart(productToAdd) {
 
 function addToCart() {
   addProductToCart(product);
+  updateCartCount();
+  animateCartIcon();
 }
 
 function renderProductDetails() {
@@ -29,6 +54,25 @@ function renderProductDetails() {
     product.Colors?.[0]?.ColorName || "";
   document.querySelector("#productDescriptionHtmlSimple").innerHTML =
     product.DescriptionHtmlSimple;
+
+  const discount = getDiscount(product);
+  let discountElement = document.querySelector("#productDiscount");
+
+  if (!discountElement) {
+    discountElement = document.createElement("p");
+    discountElement.id = "productDiscount";
+    discountElement.classList.add("discount-tag", "discount-tag-detail");
+
+    const priceElement = document.querySelector("#productFinalPrice");
+    priceElement.insertAdjacentElement("afterend", discountElement);
+  }
+
+  if (discount) {
+    discountElement.textContent = `Save $${discount.amountOff} (${discount.percentOff}% off) • Was $${discount.original}`;
+    discountElement.style.display = "inline-block";
+  } else {
+    discountElement.style.display = "none";
+  }
 
   const addButton = document.querySelector("#addToCart");
   addButton.dataset.id = product.Id;
