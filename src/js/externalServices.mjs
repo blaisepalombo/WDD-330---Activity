@@ -1,4 +1,4 @@
-const baseURL = import.meta.env.VITE_SERVER_URL;
+const baseURL = "/api/";
 
 async function convertToJson(res) {
   if (res.ok) {
@@ -22,7 +22,7 @@ async function findProductById(id) {
 }
 
 async function checkout(payload) {
-  const url = "http://server-nodejs.cit.byui.edu:3000/checkout";
+  const url = `${baseURL}checkout`;
   const options = {
     method: "POST",
     headers: {
