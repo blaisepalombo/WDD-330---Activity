@@ -10,12 +10,42 @@
   <body>
     <header class="divider" id="main-header"></header>
 
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-wrapper">
+      <p class="breadcrumb" id="breadcrumb"></p>
+    </div>
+
     <main class="divider">
       <section class="products">
         <h2 class="page-title">Top Products</h2>
         <ul class="product-list"></ul>
       </section>
     </main>
+
+    <!-- Quick View Modal (unchanged) -->
+    <div
+      class="quick-view-modal"
+      id="quickViewModal"
+      hidden
+      aria-hidden="true"
+    >
+      <div
+        class="quick-view-modal__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="quickViewTitle"
+      >
+        <button
+          class="quick-view-modal__close"
+          id="quickViewClose"
+          aria-label="Close quick view"
+          type="button"
+        >
+          ×
+        </button>
+        <div class="quick-view-modal__content" id="quickViewContent"></div>
+      </div>
+    </div>
 
     <footer id="main-footer"></footer>
   </body>

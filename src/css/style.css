@@ -523,9 +523,9 @@ footer {
 
 .cart-count {
   position: absolute;
-  top: 10px;          /* move it down slightly */
-  left: 15px;        /* pull it in a bit */
-  transform: none;   /* remove the upward shift */
+  top: 10px;
+  left: 15px;
+  transform: none;
 
   background-color: #f0a868;
   color: #303030;
@@ -580,5 +580,387 @@ footer {
 .cart-total {
   margin: 0;
   font-size: var(--large-font);
+  font-weight: bold;
+}
+
+/* Newsletter section */
+.newsletter-section {
+  padding: 2rem 1rem 2.5rem;
+  border-top: 2px solid var(--primary-color);
+}
+
+/* Remove card look, match page style */
+.newsletter-box {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+/* Typography matches rest of site */
+.newsletter-copy h2 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-family: var(--font-headline);
+  font-weight: normal;
+}
+
+.newsletter-copy p:last-child {
+  margin-bottom: 0;
+}
+
+.newsletter-eyebrow {
+  margin: 0 0 0.5rem;
+  color: var(--secondary-color);
+  font-size: var(--small-font);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Form */
+.newsletter-form {
+  margin-top: 1rem;
+}
+
+.newsletter-form label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: bold;
+}
+
+/* Mobile */
+.newsletter-form__controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Input styled like site */
+.newsletter-form input {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--light-grey);
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+/* Button inherits site button style */
+.newsletter-form button {
+  padding: 0 1.5rem;
+  font-size: var(--large-font);
+  height: 2.6rem;
+}
+
+/* Desktop */
+@media screen and (min-width: 768px) {
+  .newsletter-box {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .newsletter-form {
+    margin-top: 0;
+  }
+
+  .newsletter-form__controls {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) auto;
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+
+  .newsletter-form button {
+    width: auto;
+    margin: 0;
+    height: 100%;
+  }
+}
+
+.product-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.product-card__link {
+  display: block;
+  color: var(--dark-grey);
+  text-decoration: none;
+  flex: 1 1 auto;
+}
+
+.product-card__actions {
+  margin-top: auto;
+  padding-top: 0.5rem;
+}
+
+.quick-view-button {
+  width: 100%;
+  margin: 0;
+  padding: 0.55em 1em;
+  font-size: 1rem;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+.quick-view-modal[hidden] {
+  display: none;
+}
+
+.quick-view-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quick-view-modal__dialog {
+  position: relative;
+  width: min(720px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: white;
+  border: 2px solid var(--primary-color);
+  padding: 1.25rem;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
+.quick-view-modal__close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 2rem;
+  height: 2rem;
+  margin: 0;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--dark-grey);
+  color: white;
+  font-size: 1.25rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quick-view-loading {
+  margin: 0;
+  padding: 2rem 0;
+  text-align: center;
+}
+
+.quick-view-product__brand {
+  margin: 0 0 0.5rem;
+  font-size: var(--small-font);
+}
+
+.quick-view-product__name {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.quick-view-product__price {
+  margin-bottom: 0.5rem;
+}
+
+.quick-view-product__color {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.quick-view-product__description {
+  line-height: 1.5;
+}
+
+.quick-view-product__description p:first-child {
+  margin-top: 0;
+}
+
+.quick-view-product__link {
+  margin-top: 1rem;
+}
+
+@media screen and (min-width: 700px) {
+  .quick-view-product {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .quick-view-product__image img {
+    width: 100%;
+    display: block;
+  }
+}
+
+/* Giveaway + Register Modals */
+.giveaway-modal[hidden],
+.register-modal[hidden] {
+  display: none;
+}
+
+.giveaway-modal,
+.register-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+/* Dialog */
+.giveaway-modal__dialog,
+.register-modal__dialog {
+  position: relative;
+  width: min(560px, 100%);
+  padding: 1.5rem;
+  background: white;
+  border: 2px solid var(--primary-color);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
+/* Close button */
+.giveaway-modal__close,
+.register-modal__close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 2rem;
+  height: 2rem;
+  margin: 0;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--dark-grey);
+  color: white;
+  font-size: 1.25rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Eyebrow */
+.giveaway-modal__eyebrow,
+.register-modal__eyebrow {
+  margin: 0 0 0.5rem;
+  color: var(--secondary-color);
+  font-size: var(--small-font);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Headings */
+.giveaway-modal__dialog h2,
+.register-modal__dialog h2 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-family: var(--font-headline);
+  font-weight: normal;
+}
+
+/* Text */
+.giveaway-modal__dialog p,
+.register-modal__intro {
+  line-height: 1.5;
+}
+
+/* Actions (buttons) */
+.giveaway-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+/* Make BOTH buttons same size */
+.giveaway-modal__actions .button-link,
+.giveaway-modal__secondary {
+  padding: 0.5em 2em;
+  font-size: var(--large-font);
+  width: 100%;
+  text-align: center;
+}
+
+/* Secondary button style */
+.giveaway-modal__secondary {
+  background: white;
+  color: var(--secondary-color);
+  border: 1px solid var(--secondary-color);
+}
+
+/* Register modal form */
+.register-modal__form {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.register-modal__form label {
+  font-weight: bold;
+  margin-bottom: -0.35rem;
+}
+
+.register-modal__form input {
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--light-grey);
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.register-modal__form button {
+  margin: 0.5rem 0 0;
+}
+
+.register-modal__note {
+  min-height: 1.5rem;
+  margin-top: 1rem;
+  color: var(--secondary-color);
+  font-weight: bold;
+}
+
+/* Prevent background scroll */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* Desktop */
+@media screen and (min-width: 700px) {
+  .giveaway-modal__actions {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .giveaway-modal__actions .button-link,
+  .giveaway-modal__secondary {
+    width: auto;
+  }
+}
+
+/* Breadcrumb */
+.breadcrumb-wrapper {
+  padding: 0.75rem 0.5rem 0;
+}
+
+.breadcrumb {
+  max-width: 1080px;
+  margin: 0 auto;
+  color: var(--secondary-color);
+  font-size: var(--small-font);
   font-weight: bold;
 }

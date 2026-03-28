@@ -47,9 +47,12 @@ function renderProductDetails() {
   document.querySelector("#productName").textContent = product.Brand.Name;
   document.querySelector("#productNameWithoutBrand").textContent =
     product.NameWithoutBrand;
-  document.querySelector("#productImage").src = fixImageUrl(product.Images.PrimaryLarge);
+  document.querySelector("#productImage").src = fixImageUrl(
+    product.Images.PrimaryLarge
+  );
   document.querySelector("#productImage").alt = product.Name;
-  document.querySelector("#productFinalPrice").textContent = `$${product.FinalPrice}`;
+  document.querySelector("#productFinalPrice").textContent =
+    `$${product.FinalPrice}`;
   document.querySelector("#productColorName").textContent =
     product.Colors?.[0]?.ColorName || "";
   document.querySelector("#productDescriptionHtmlSimple").innerHTML =
@@ -68,7 +71,8 @@ function renderProductDetails() {
   }
 
   if (discount) {
-    discountElement.textContent = `Save $${discount.amountOff} (${discount.percentOff}% off) • Was $${discount.original}`;
+    discountElement.textContent =
+      `Save $${discount.amountOff} (${discount.percentOff}% off) • Was $${discount.original}`;
     discountElement.style.display = "inline-block";
   } else {
     discountElement.style.display = "none";
