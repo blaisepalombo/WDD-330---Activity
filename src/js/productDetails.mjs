@@ -1,27 +1,27 @@
-import { findProductById } from './productData.mjs';
-import { getLocalStorage, setLocalStorage } from './utils.mjs';
+import externalServices from "./externalServices.mjs";
+import { getLocalStorage, setLocalStorage } from "./utils.mjs";
 
 let product = {};
 
 function renderProductDetails() {
-  document.querySelector('#productName').textContent = product.Brand.Name;
-  document.querySelector('#productNameWithoutBrand').textContent =
+  document.querySelector("#productName").textContent = product.Brand.Name;
+  document.querySelector("#productNameWithoutBrand").textContent =
     product.NameWithoutBrand;
-  document.querySelector('#productImage').src = product.Images.PrimaryLarge;
-  document.querySelector('#productImage').alt = product.Name;
-  document.querySelector('#productFinalPrice').textContent =
+  document.querySelector("#productImage").src = product.Images.PrimaryLarge;
+  document.querySelector("#productImage").alt = product.Name;
+  document.querySelector("#productFinalPrice").textContent =
     `$${product.FinalPrice}`;
-  document.querySelector('#productColorName').textContent =
+  document.querySelector("#productColorName").textContent =
     product.Colors[0].ColorName;
-  document.querySelector('#productDescriptionHtmlSimple').innerHTML =
+  document.querySelector("#productDescriptionHtmlSimple").innerHTML =
     product.DescriptionHtmlSimple;
-  document.querySelector('#addToCart').dataset.id = product.Id;
+  document.querySelector("#addToCart").dataset.id = product.Id;
 }
 
 function addProductToCart(productToAdd) {
-  const cartItems = getLocalStorage('so-cart') || [];
+  const cartItems = getLocalStorage("so-cart") || [];
   cartItems.push(productToAdd);
-  setLocalStorage('so-cart', cartItems);
+  setLocalStorage("so-cart", cartItems);
 }
 
 function addToCart() {
@@ -29,7 +29,7 @@ function addToCart() {
 }
 
 export default async function productDetails(productId) {
-  product = await findProductById(productId);
+  product = await externalServices.findProductById(productId);
   renderProductDetails();
-  document.querySelector('#addToCart').addEventListener('click', addToCart);
+  document.querySelector("#addToCart").addEventListener("click", addToCart);
 }

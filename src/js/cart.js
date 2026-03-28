@@ -4,6 +4,15 @@ function renderCartContents() {
   const cartItems = getLocalStorage("so-cart") || [];
   const htmlItems = cartItems.map((item) => cartItemTemplate(item));
   document.querySelector(".product-list").innerHTML = htmlItems.join("");
+  renderCartTotal(cartItems);
+}
+
+function renderCartTotal(cartItems) {
+  const totalElement = document.querySelector("#cart-total");
+  if (!totalElement) return;
+
+  const total = cartItems.reduce((sum, item) => sum + Number(item.FinalPrice), 0);
+  totalElement.textContent = total.toFixed(2);
 }
 
 function getItemImage(item) {
