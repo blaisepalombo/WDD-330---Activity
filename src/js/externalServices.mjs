@@ -41,6 +41,33 @@ async function checkout(payload) {
   return convertToJson(response);
 }
 
+export async function loginRequest(creds) {
+  const url = `${baseURL}login`;
+  const options = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(creds)
+  };
+
+  const response = await fetch(url, options);
+  return convertToJson(response);
+}
+
+export async function getOrders(token) {
+  const url = `${baseURL}orders`;
+  const options = {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  };
+
+  const response = await fetch(url, options);
+  return convertToJson(response);
+}
+
 export default {
   getProductsByCategory,
   findProductById,

@@ -389,3 +389,42 @@ footer {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
+.login-page {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.login-form label {
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.login-form input {
+  width: 100%;
+  padding: 0.65rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.orders-page {
+  padding: 2rem 1rem;
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.orders-table th,
+.orders-table td {
+  border: 1px solid var(--light-grey);
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.orders-table th {
+  background: #f5f5f5;
+}
