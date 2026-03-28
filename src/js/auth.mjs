@@ -6,7 +6,13 @@ const tokenKey = "so-token";
 
 export async function login(creds, redirect = "/") {
   try {
-    const token = await loginRequest(creds);
+    const response = await loginRequest(creds);
+    const token = typeof response === "string" ? response : response.accessToken || response.token;
+
+    if (!token) {
+      throw new Error("No token returned from login.");
+    }
+
     setLocalStorage(tokenKey, token);
     window.location = redirect;
   } catch (err) {
@@ -26,13 +32,8 @@ export function isTokenValid(token) {
   try {
     const decoded = jwtDecode(token);
     const currentDate = new Date();
-
-    if (decoded.exp * 1000 < currentDate.getTime()) {
-      return false;
-    }
-
-    return true;
-  } catch (err) {
+    return decoded.exp * 1000 >= currentDate.getTime();
+  } catch {
     return false;
   }
 }

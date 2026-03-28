@@ -1,4 +1,4 @@
-import { loadHeaderFooter } from "./utils.mjs";
+import { loadHeaderFooter, alertMessage } from "./utils.mjs";
 import { checkLogin } from "./auth.mjs";
 import { getOrders } from "./externalServices.mjs";
 import { renderOrderList } from "./currentOrders.mjs";
@@ -12,6 +12,12 @@ if (token) {
 }
 
 async function init() {
-  const orders = await getOrders(token);
-  renderOrderList(".orders-list", orders);
+  try {
+    const response = await getOrders(token);
+    const orders = Array.isArray(response) ? response : response.Result || response.orders || [];
+    renderOrderList(".orders-list", orders);
+  } catch (err) {
+    alertMessage("Could not load orders. Try logging in again.");
+    console.error(err);
+  }
 }
