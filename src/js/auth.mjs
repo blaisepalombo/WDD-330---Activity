@@ -1,13 +1,25 @@
 import { jwtDecode } from "jwt-decode";
-import { loginRequest } from "./externalServices.mjs";
+import { loginRequest, createUserRequest } from "./externalServices.mjs";
 import { alertMessage, getLocalStorage, setLocalStorage } from "./utils.mjs";
 
 const tokenKey = "so-token";
 
+function getMessage(err, fallback) {
+  return (
+    err?.message?.message ||
+    err?.message?.error ||
+    err?.message ||
+    fallback
+  );
+}
+
 export async function login(creds, redirect = "/") {
   try {
     const response = await loginRequest(creds);
-    const token = typeof response === "string" ? response : response.accessToken || response.token;
+    const token =
+      typeof response === "string"
+        ? response
+        : response.accessToken || response.token;
 
     if (!token) {
       throw new Error("No token returned from login.");
@@ -16,13 +28,16 @@ export async function login(creds, redirect = "/") {
     setLocalStorage(tokenKey, token);
     window.location = redirect;
   } catch (err) {
-    const message =
-      err?.message?.message ||
-      err?.message?.error ||
-      err?.message ||
-      "Login failed. Please try again.";
+    alertMessage(getMessage(err, "Login failed. Please try again."));
+  }
+}
 
-    alertMessage(message);
+export async function register(user, redirect = "/login/index.html") {
+  try {
+    await createUserRequest(user);
+    window.location = redirect;
+  } catch (err) {
+    alertMessage(getMessage(err, "Signup failed. Please try again."));
   }
 }
 

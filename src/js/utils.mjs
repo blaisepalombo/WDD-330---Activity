@@ -1,3 +1,5 @@
+import { jwtDecode } from "jwt-decode";
+
 export function qs(selector, parent = document) {
   return parent.querySelector(selector);
 }
@@ -66,6 +68,52 @@ function setupHeaderSearch() {
   }
 }
 
+function getUserNameFromToken() {
+  const token = getLocalStorage("so-token");
+  if (!token) return null;
+
+  try {
+    const decoded = jwtDecode(token);
+
+    return (
+      decoded.name ||
+      decoded.userName ||
+      decoded.username ||
+      decoded.email ||
+      null
+    );
+  } catch {
+    return null;
+  }
+}
+
+function renderHeaderAuth() {
+  const authContainer = document.querySelector("#headerAuth");
+  if (!authContainer) return;
+
+  const token = getLocalStorage("so-token");
+  const userName = getUserNameFromToken();
+
+  if (token && userName) {
+    authContainer.innerHTML = `
+      <span class="header-auth__name">${userName}</span>
+      <button type="button" class="header-auth__logout" id="logoutButton">Logout</button>
+    `;
+
+    const logoutButton = document.querySelector("#logoutButton");
+    if (logoutButton) {
+      logoutButton.addEventListener("click", () => {
+        localStorage.removeItem("so-token");
+        window.location.href = "/index.html";
+      });
+    }
+  } else {
+    authContainer.innerHTML = `
+      <a href="/login/index.html" class="header-auth__login">Login</a>
+    `;
+  }
+}
+
 export async function loadHeaderFooter() {
   const headerTemplate = loadTemplate("/partials/header.html");
   const footerTemplate = loadTemplate("/partials/footer.html");
@@ -76,6 +124,7 @@ export async function loadHeaderFooter() {
   if (headerElement) {
     await renderWithTemplate(headerTemplate, headerElement);
     setupHeaderSearch();
+    renderHeaderAuth();
   }
 
   if (footerElement) {

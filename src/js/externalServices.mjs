@@ -27,48 +27,6 @@ async function findProductById(id) {
   return data.Result;
 }
 
-async function searchProducts(query) {
-  const trimmedQuery = query.trim().toLowerCase();
-
-  if (!trimmedQuery) {
-    return [];
-  }
-
-  const categories = ["tents", "backpacks", "sleeping-bags", "hammocks"];
-
-  const categoryResults = await Promise.all(
-    categories.map(async (category) => {
-      try {
-        const products = await getProductsByCategory(category);
-
-        return products
-          .filter((product) => {
-            const searchableText = [
-              product.Name,
-              product.NameWithoutBrand,
-              product.Brand?.Name,
-              product.DescriptionHtmlSimple
-            ]
-              .filter(Boolean)
-              .join(" ")
-              .toLowerCase();
-
-            return searchableText.includes(trimmedQuery);
-          })
-          .map((product) => ({
-            ...product,
-            _category: category
-          }));
-      } catch (error) {
-        console.error(`Search failed for category: ${category}`, error);
-        return [];
-      }
-    })
-  );
-
-  return categoryResults.flat();
-}
-
 async function checkout(payload) {
   const url = `${baseURL}checkout`;
   const options = {
@@ -97,6 +55,32 @@ export async function loginRequest(creds) {
   return convertToJson(response);
 }
 
+export async function createUserRequest(user) {
+  console.log("Sending user:", user);
+
+  const url = `/api/users`;
+  const options = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(user)
+  };
+
+  const response = await fetch(url, options);
+
+  console.log("Response status:", response.status);
+
+  const data = await response.json();
+  console.log("Response data:", data);
+
+  if (!response.ok) {
+    throw { message: data };
+  }
+
+  return data;
+}
+
 export async function getOrders(token) {
   const url = `${baseURL}orders`;
   const options = {
@@ -113,6 +97,5 @@ export async function getOrders(token) {
 export default {
   getProductsByCategory,
   findProductById,
-  searchProducts,
   checkout
 };
