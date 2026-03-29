@@ -68,6 +68,13 @@ function setupHeaderSearch() {
   }
 }
 
+function getUserNameFromStorage() {
+  const storedUser = getLocalStorage("so-user");
+  if (!storedUser) return null;
+
+  return storedUser.name || storedUser.email || null;
+}
+
 function getUserNameFromToken() {
   const token = getLocalStorage("so-token");
   if (!token) return null;
@@ -79,6 +86,7 @@ function getUserNameFromToken() {
       decoded.name ||
       decoded.userName ||
       decoded.username ||
+      decoded.fullName ||
       decoded.email ||
       null
     );
@@ -92,11 +100,11 @@ function renderHeaderAuth() {
   if (!authContainer) return;
 
   const token = getLocalStorage("so-token");
-  const userName = getUserNameFromToken();
+  const userName = getUserNameFromStorage() || getUserNameFromToken();
 
-  if (token && userName) {
+  if (token) {
     authContainer.innerHTML = `
-      <span class="header-auth__name">${userName}</span>
+      <span class="header-auth__name">${userName || "Account"}</span>
       <button type="button" class="header-auth__logout" id="logoutButton">Logout</button>
     `;
 
@@ -104,6 +112,7 @@ function renderHeaderAuth() {
     if (logoutButton) {
       logoutButton.addEventListener("click", () => {
         localStorage.removeItem("so-token");
+        localStorage.removeItem("so-user");
         window.location.href = "/index.html";
       });
     }

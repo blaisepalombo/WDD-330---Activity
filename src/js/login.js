@@ -1,17 +1,33 @@
-import { loadHeaderFooter, getParam } from "./utils.mjs";
+import { loadHeaderFooter, getParam, alertMessage } from "./utils.mjs";
 import { login } from "./auth.mjs";
 
-loadHeaderFooter();
+async function init() {
+  await loadHeaderFooter();
 
-const redirect = getParam("redirect") || "/orders/index.html";
-const form = document.querySelector("#login-form");
+  const signupMessage = sessionStorage.getItem("signup-success");
+  if (signupMessage) {
+    alertMessage(signupMessage, false);
+    sessionStorage.removeItem("signup-success");
+  }
 
-form.addEventListener("submit", async (event) => {
-  event.preventDefault();
+  const redirect = getParam("redirect") || "/index.html";
+  const form = document.querySelector("#login-form");
 
-  const email = document.querySelector("#email").value.trim();
-  const password = document.querySelector("#password").value.trim();
+  if (!form) return;
 
-  const creds = { email, password };
-  await login(creds, redirect);
-});
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const isValid = form.checkValidity();
+    form.reportValidity();
+
+    if (!isValid) return;
+
+    const email = document.querySelector("#email").value.trim();
+    const password = document.querySelector("#password").value.trim();
+
+    await login({ email, password }, redirect);
+  });
+}
+
+init();

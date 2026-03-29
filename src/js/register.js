@@ -1,5 +1,3 @@
-console.log("register.js loaded");
-
 import { loadHeaderFooter } from "./utils.mjs";
 import { register } from "./auth.mjs";
 
@@ -22,14 +20,15 @@ async function init() {
     const email = document.querySelector("#email").value.trim();
     const password = document.querySelector("#password").value.trim();
 
-    const user = {
-      name,
-      address,
-      email,
-      password
-    };
-
-    await register(user, "/login/index.html");
+    await register(
+      {
+        name,
+        address,
+        email,
+        password
+      },
+      "/login/index.html"
+    );
   });
 }
 

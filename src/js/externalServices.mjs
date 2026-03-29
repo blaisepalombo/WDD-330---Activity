@@ -1,7 +1,13 @@
 const baseURL = "/api/";
 
 async function convertToJson(res) {
-  const jsonResponse = await res.json();
+  let jsonResponse = null;
+
+  try {
+    jsonResponse = await res.json();
+  } catch {
+    jsonResponse = null;
+  }
 
   if (res.ok) {
     return jsonResponse;
@@ -9,7 +15,7 @@ async function convertToJson(res) {
 
   throw {
     name: "servicesError",
-    message: jsonResponse
+    message: jsonResponse || `Request failed with status ${res.status}`
   };
 }
 
@@ -56,9 +62,7 @@ export async function loginRequest(creds) {
 }
 
 export async function createUserRequest(user) {
-  console.log("Sending user:", user);
-
-  const url = `/api/users`;
+  const url = `${baseURL}users`;
   const options = {
     method: "POST",
     headers: {
@@ -68,17 +72,7 @@ export async function createUserRequest(user) {
   };
 
   const response = await fetch(url, options);
-
-  console.log("Response status:", response.status);
-
-  const data = await response.json();
-  console.log("Response data:", data);
-
-  if (!response.ok) {
-    throw { message: data };
-  }
-
-  return data;
+  return convertToJson(response);
 }
 
 export async function getOrders(token) {
