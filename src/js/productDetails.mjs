@@ -12,6 +12,8 @@ import {
 
 let product = {};
 let currentCategory = "tents";
+let productImages = [];
+let currentImageIndex = 0;
 
 function fixImageUrl(url) {
   if (!url) return "";
@@ -86,16 +88,135 @@ function handleWishlistToggle() {
   updateWishlistButton();
 }
 
+function collectProductImages(productToRender) {
+  const images = [];
+
+  const addImage = (url) => {
+    if (!url) return;
+    images.push(fixImageUrl(url));
+  };
+
+  addImage(productToRender.Images?.PrimaryExtraLarge);
+  addImage(productToRender.Images?.PrimaryLarge);
+  addImage(productToRender.Images?.PrimaryMedium);
+  addImage(productToRender.Image);
+
+  if (Array.isArray(productToRender.ExtraImages)) {
+    productToRender.ExtraImages.forEach((image) => {
+      if (typeof image === "string") {
+        addImage(image);
+      } else {
+        addImage(
+          image?.Src ||
+            image?.src ||
+            image?.Url ||
+            image?.url ||
+            image?.PrimaryLarge ||
+            image?.PrimaryMedium
+        );
+      }
+    });
+  }
+
+  return images.filter(Boolean);
+}
+
+function renderActiveImage() {
+  const img = document.querySelector("#productImage");
+  const thumbsContainer = document.querySelector("#productImageThumbs");
+  const prevButton = document.querySelector("#carouselPrev");
+  const nextButton = document.querySelector("#carouselNext");
+
+  if (!img || !productImages.length) return;
+
+  img.src = productImages[currentImageIndex];
+  img.alt = `${product.Name} image ${currentImageIndex + 1}`;
+
+  if (thumbsContainer) {
+    thumbsContainer.querySelectorAll(".product-image-thumb").forEach((button, index) => {
+      button.classList.toggle("active", index === currentImageIndex);
+    });
+  }
+
+  const hasMultipleImages = productImages.length > 1;
+
+  if (prevButton) {
+    prevButton.classList.toggle("hide", !hasMultipleImages);
+  }
+
+  if (nextButton) {
+    nextButton.classList.toggle("hide", !hasMultipleImages);
+  }
+}
+
+function renderImageThumbs() {
+  const thumbsContainer = document.querySelector("#productImageThumbs");
+  if (!thumbsContainer) return;
+
+  if (productImages.length <= 1) {
+    thumbsContainer.innerHTML = "";
+    thumbsContainer.classList.add("hide");
+    return;
+  }
+
+  thumbsContainer.classList.remove("hide");
+  thumbsContainer.innerHTML = productImages
+    .map(
+      (image, index) => `
+        <button
+          type="button"
+          class="product-image-thumb ${index === currentImageIndex ? "active" : ""}"
+          data-index="${index}"
+          aria-label="Show product image ${index + 1}"
+        >
+          <img src="${image}" alt="${product.Name} thumbnail ${index + 1}" />
+        </button>
+      `
+    )
+    .join("");
+
+  thumbsContainer.querySelectorAll(".product-image-thumb").forEach((button) => {
+    button.addEventListener("click", () => {
+      currentImageIndex = Number(button.dataset.index);
+      renderActiveImage();
+    });
+  });
+}
+
+function setupImageCarousel() {
+  productImages = collectProductImages(product);
+  currentImageIndex = 0;
+
+  renderImageThumbs();
+  renderActiveImage();
+
+  const prevButton = document.querySelector("#carouselPrev");
+  const nextButton = document.querySelector("#carouselNext");
+
+  if (prevButton) {
+    prevButton.addEventListener("click", () => {
+      if (!productImages.length) return;
+      currentImageIndex =
+        (currentImageIndex - 1 + productImages.length) % productImages.length;
+      renderActiveImage();
+    });
+  }
+
+  if (nextButton) {
+    nextButton.addEventListener("click", () => {
+      if (!productImages.length) return;
+      currentImageIndex = (currentImageIndex + 1) % productImages.length;
+      renderActiveImage();
+    });
+  }
+}
+
 function renderProductDetails() {
   document.querySelector("#productName").textContent = product.Brand.Name;
   document.querySelector("#productNameWithoutBrand").textContent =
     product.NameWithoutBrand;
 
-  const img = document.querySelector("#productImage");
-  img.src = fixImageUrl(
-    product.Images.PrimaryExtraLarge || product.Images.PrimaryLarge
-  );
-  img.alt = product.Name;
+  setupImageCarousel();
 
   document.querySelector("#productFinalPrice").textContent =
     `$${Number(product.FinalPrice).toFixed(2)}`;
