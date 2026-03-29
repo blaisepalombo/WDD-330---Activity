@@ -1,40 +1,44 @@
 import externalServices from "./externalServices.mjs";
 import { alertMessage, getLocalStorage, setLocalStorage } from "./utils.mjs";
 
+function getItemQuantity(item) {
+  return Number(item.quantity || 1);
+}
+
 function calculateItemSubtotal(items) {
-  return items.reduce((sum, item) => sum + Number(item.FinalPrice), 0);
+  return items.reduce(
+    (sum, item) => sum + Number(item.FinalPrice) * getItemQuantity(item),
+    0
+  );
 }
 
 function calculateShipping(items) {
-  if (!items.length) return 0;
-  return 10 + (items.length - 1) * 2;
+  const totalQuantity = items.reduce(
+    (sum, item) => sum + getItemQuantity(item),
+    0
+  );
+
+  if (!totalQuantity) return 0;
+  return 10 + (totalQuantity - 1) * 2;
 }
 
-function calculateTax(subtotal) {
+function calculateTax(subtotal, zip) {
+  const cleanZip = String(zip || "").trim();
+
+  if (!/^\d{5}$/.test(cleanZip)) {
+    return 0;
+  }
+
   return subtotal * 0.06;
 }
 
 function packageItems(items) {
-  const packagedItems = [];
-
-  items.forEach((item) => {
-    const existingItem = packagedItems.find(
-      (packagedItem) => packagedItem.id === item.Id
-    );
-
-    if (existingItem) {
-      existingItem.quantity += 1;
-    } else {
-      packagedItems.push({
-        id: item.Id,
-        name: item.Name,
-        price: item.FinalPrice,
-        quantity: 1
-      });
-    }
-  });
-
-  return packagedItems;
+  return items.map((item) => ({
+    id: item.Id,
+    name: item.Name,
+    price: item.FinalPrice,
+    quantity: getItemQuantity(item)
+  }));
 }
 
 function getErrorMessage(error) {
@@ -87,8 +91,10 @@ const checkoutProcess = {
   },
 
   calculateAndDisplayOrderTotals() {
+    const zip = document.querySelector("#zip")?.value || "";
+
     this.shipping = calculateShipping(this.items);
-    this.tax = calculateTax(this.subtotal);
+    this.tax = calculateTax(this.subtotal, zip);
     this.orderTotal = this.subtotal + this.shipping + this.tax;
 
     document.querySelector(`${this.outputSelector} #shipping`).textContent =
@@ -119,6 +125,10 @@ const checkoutProcess = {
 
   async checkout(form) {
     const formData = new FormData(form);
+
+    this.items = getLocalStorage(this.key) || [];
+    this.calculateAndDisplaySubtotal();
+    this.calculateAndDisplayOrderTotals();
 
     const orderData = {
       orderDate: new Date().toISOString(),

@@ -44,9 +44,11 @@ footer {
 ================================ */
 
 header {
-  display: flex;
-  justify-content: space-between;
-  padding: 0 10px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 10px;
 }
 
 .logo {
@@ -67,6 +69,46 @@ header {
 .logo a {
   text-decoration: none;
   color: var(--font-body);
+}
+
+.header-search {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.header-search input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--light-grey);
+  font-size: 1rem;
+}
+
+.cart {
+  justify-self: end;
+}
+
+.header-search button {
+  margin: 0;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .hero {
@@ -133,7 +175,7 @@ button {
 }
 
 .hide {
-  display: none;
+  display: none !important;
 }
 
 /* ================================
@@ -967,6 +1009,10 @@ body.modal-open {
 }
 
 @media screen and (min-width: 700px) {
+  .header-search {
+    justify-content: flex-end;
+  }
+  
   .products-header {
     flex-direction: row;
     justify-content: space-between;
@@ -1028,5 +1074,66 @@ body.modal-open {
     width: auto;
     margin: 0;
     height: 100%;
+  }
+}
+
+@media screen and (max-width: 699px) {
+  .header-search input {
+    max-width: none;
+  }
+
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-search {
+    order: 3;
+    flex-basis: 100%;
+    max-width: none;
+  }
+}
+
+.cart-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--light-grey);
+  flex-wrap: wrap;
+}
+
+.checkout-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 220px;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--secondary-color);
+  color: white;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 4px;
+  margin: 0;
+}
+
+.checkout-button:hover {
+  opacity: 0.9;
+}
+
+@media screen and (max-width: 600px) {
+  .cart-footer {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .checkout-button {
+    width: 100%;
+    max-width: 320px;
   }
 }

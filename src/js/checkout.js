@@ -9,6 +9,10 @@ async function init() {
 
   const zipInput = document.querySelector("#zip");
   if (zipInput) {
+    zipInput.addEventListener("input", () => {
+      checkoutProcess.calculateAndDisplayOrderTotals();
+    });
+
     zipInput.addEventListener("blur", () => {
       checkoutProcess.calculateAndDisplayOrderTotals();
     });

@@ -25,15 +25,16 @@ function getDiscount(product) {
 
 function productCardTemplate(product, category) {
   const discount = getDiscount(product);
+  const productCategory = product._category || category;
 
   return `
     <li class="product-card">
       <a
         class="product-card__link"
-        href="../product_pages/index.html?product=${product.Id}&category=${category}"
+        href="../product_pages/index.html?product=${product.Id}&category=${productCategory}"
       >
         <img
-          src="${fixImageUrl(product.Images.PrimaryLarge)}"
+          src="${fixImageUrl(product.Images?.PrimaryLarge || product.Image)}"
           alt="${product.Name}"
         />
         <h3 class="card__brand">${product.Brand.Name}</h3>
@@ -51,6 +52,7 @@ function productCardTemplate(product, category) {
           class="quick-view-button"
           type="button"
           data-product-id="${product.Id}"
+          data-category="${productCategory}"
         >
           Quick View
         </button>
@@ -63,6 +65,21 @@ export function renderProductList(selector, products, category) {
   const element = document.querySelector(selector);
   if (!element) return;
 
+  if (!products.length) {
+    element.innerHTML = `
+      <li class="product-error-card">
+        <img
+          class="product-error-card__image"
+          src="/images/noun_Tent_2517.svg"
+          alt="No products found"
+        />
+        <h2>No products found</h2>
+        <p>Try a different search term or browse one of the categories.</p>
+      </li>
+    `;
+    return;
+  }
+
   const htmlStrings = products.map((product) =>
     productCardTemplate(product, category)
   );
@@ -74,31 +91,54 @@ function setupQuickView(listElement, category) {
   const modalContent = document.querySelector("#quickViewContent");
   const closeButton = document.querySelector("#quickViewClose");
 
-  if (!modal || !modalContent || !closeButton) return;
+  if (!modal || !modalContent || !closeButton || !listElement) return;
 
   function closeModal() {
     modal.hidden = true;
+    modal.setAttribute("aria-hidden", "true");
     modalContent.innerHTML = "";
   }
 
-  async function openModal(productId) {
+  async function openModal(productId, productCategory) {
     modal.hidden = false;
-    modalContent.innerHTML = "Loading...";
+    modal.setAttribute("aria-hidden", "false");
+    modalContent.innerHTML = `<p class="quick-view-loading">Loading...</p>`;
 
     const product = await externalServices.findProductById(productId);
+    const detailCategory = productCategory || category;
 
     modalContent.innerHTML = `
-      <h2>${product.NameWithoutBrand}</h2>
-      <img src="${fixImageUrl(product.Images.PrimaryLarge)}" alt="${product.Name}" />
-      <p>$${product.FinalPrice}</p>
-      <p>${product.DescriptionHtmlSimple}</p>
+      <div class="quick-view-product">
+        <div class="quick-view-product__image">
+          <img
+            src="${fixImageUrl(product.Images?.PrimaryLarge || product.Image)}"
+            alt="${product.Name}"
+          />
+        </div>
 
-      <a
-        class="button-link"
-        href="../product_pages/index.html?product=${product.Id}&category=${category}"
-      >
-        View Full Details
-      </a>
+        <div class="quick-view-product__details">
+          <p class="quick-view-product__brand">${product.Brand.Name}</p>
+          <h2 class="quick-view-product__name">${product.NameWithoutBrand}</h2>
+          <p class="quick-view-product__price">$${product.FinalPrice}</p>
+          <p class="quick-view-product__color">
+            ${
+              product.Colors?.[0]?.ColorName
+                ? `Color: ${product.Colors[0].ColorName}`
+                : ""
+            }
+          </p>
+          <div class="quick-view-product__description">
+            ${product.DescriptionHtmlSimple || ""}
+          </div>
+
+          <a
+            class="button-link quick-view-product__link"
+            href="../product_pages/index.html?product=${product.Id}&category=${detailCategory}"
+          >
+            View Full Details
+          </a>
+        </div>
+      </div>
     `;
   }
 
@@ -106,13 +146,15 @@ function setupQuickView(listElement, category) {
     const btn = event.target.closest(".quick-view-button");
     if (!btn) return;
 
-    await openModal(btn.dataset.productId);
+    await openModal(btn.dataset.productId, btn.dataset.category);
   });
 
   closeButton.addEventListener("click", closeModal);
 
   modal.addEventListener("click", (event) => {
-    if (event.target === modal) closeModal();
+    if (event.target === modal) {
+      closeModal();
+    }
   });
 }
 
@@ -124,4 +166,9 @@ export default async function productList(selector, category) {
   setupQuickView(element, category);
 
   return products;
+}
+
+export function initQuickView(selector, category) {
+  const element = document.querySelector(selector);
+  setupQuickView(element, category);
 }

@@ -1,26 +1,21 @@
-// wrapper for querySelector...returns matching element
 export function qs(selector, parent = document) {
   return parent.querySelector(selector);
 }
 
-// get a url parameter value
 export function getParam(param) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
   return urlParams.get(param);
 }
 
-// retrieve data from localstorage
 export function getLocalStorage(key) {
   return JSON.parse(localStorage.getItem(key));
 }
 
-// save data to local storage
 export function setLocalStorage(key, data) {
   localStorage.setItem(key, JSON.stringify(data));
 }
 
-// set a listener for both touchend and click
 export function setClick(selector, callback) {
   qs(selector).addEventListener("touchend", (event) => {
     event.preventDefault();
@@ -61,6 +56,16 @@ export function loadTemplate(path) {
   };
 }
 
+function setupHeaderSearch() {
+  const searchInput = document.querySelector("#siteSearch");
+  if (!searchInput) return;
+
+  const currentSearch = getParam("q");
+  if (currentSearch) {
+    searchInput.value = currentSearch;
+  }
+}
+
 export async function loadHeaderFooter() {
   const headerTemplate = loadTemplate("/partials/header.html");
   const footerTemplate = loadTemplate("/partials/footer.html");
@@ -70,6 +75,7 @@ export async function loadHeaderFooter() {
 
   if (headerElement) {
     await renderWithTemplate(headerTemplate, headerElement);
+    setupHeaderSearch();
   }
 
   if (footerElement) {

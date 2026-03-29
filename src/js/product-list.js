@@ -1,5 +1,13 @@
-import productList, { renderProductList } from "./productList.mjs";
-import { getParam, loadHeaderFooter, updateCartCount } from "./utils.mjs";
+import externalServices from "./externalServices.mjs";
+import {
+  getParam,
+  loadHeaderFooter,
+  updateCartCount
+} from "./utils.mjs";
+import {
+  initQuickView,
+  renderProductList
+} from "./productList.mjs";
 
 function formatCategory(category) {
   return category
@@ -8,12 +16,10 @@ function formatCategory(category) {
     .join(" ");
 }
 
-function updateBreadcrumb(category, count) {
+function updateBreadcrumb(text) {
   const el = document.querySelector("#breadcrumb");
   if (!el) return;
-
-  const label = count === 1 ? "item" : "items";
-  el.textContent = `${formatCategory(category)} -> (${count} ${label})`;
+  el.textContent = text;
 }
 
 function sortProducts(products, sortValue) {
@@ -33,11 +39,15 @@ function sortProducts(products, sortValue) {
       break;
 
     case "price-asc":
-      sortedProducts.sort((a, b) => Number(a.FinalPrice) - Number(b.FinalPrice));
+      sortedProducts.sort(
+        (a, b) => Number(a.FinalPrice) - Number(b.FinalPrice)
+      );
       break;
 
     case "price-desc":
-      sortedProducts.sort((a, b) => Number(b.FinalPrice) - Number(a.FinalPrice));
+      sortedProducts.sort(
+        (a, b) => Number(b.FinalPrice) - Number(a.FinalPrice)
+      );
       break;
 
     default:
@@ -52,16 +62,42 @@ async function init() {
   updateCartCount();
 
   const category = getParam("category") || "tents";
+  const searchQuery = getParam("q")?.trim() || "";
   const sortSelect = document.querySelector("#sortProducts");
-
-  const products = await productList(".product-list", category);
-
   const title = document.querySelector(".page-title");
-  if (title) {
-    title.textContent = `Top Products: ${formatCategory(category)}`;
+
+  let products = [];
+  let quickViewCategory = category;
+
+  if (searchQuery) {
+    products = await externalServices.searchProducts(searchQuery);
+    quickViewCategory = "search";
+
+    if (title) {
+      title.textContent = `Search Results: "${searchQuery}"`;
+    }
+
+    updateBreadcrumb(
+      `Search -> "${searchQuery}" (${products.length} ${
+        products.length === 1 ? "item" : "items"
+      })`
+    );
+  } else {
+    products = await externalServices.getProductsByCategory(category);
+
+    if (title) {
+      title.textContent = `Top Products: ${formatCategory(category)}`;
+    }
+
+    updateBreadcrumb(
+      `${formatCategory(category)} -> (${products.length} ${
+        products.length === 1 ? "item" : "items"
+      })`
+    );
   }
 
-  updateBreadcrumb(category, products.length);
+  renderProductList(".product-list", products, category);
+  initQuickView(".product-list", quickViewCategory);
 
   if (sortSelect) {
     sortSelect.addEventListener("change", () => {
