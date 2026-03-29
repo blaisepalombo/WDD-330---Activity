@@ -1137,3 +1137,22 @@ body.modal-open {
     max-width: 320px;
   }
 }
+
+.recommended-products {
+  max-width: 1080px;
+  margin: 2rem auto 0;
+  padding: 1rem;
+}
+
+.recommended-products h2 {
+  margin-bottom: 1rem;
+}
+
+.recommended-products__list {
+  justify-content: flex-start;
+  gap: 1rem;
+}
+
+.recommendation-card {
+  max-width: 220px;
+}

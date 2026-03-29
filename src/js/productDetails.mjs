@@ -97,7 +97,88 @@ function renderProductDetails() {
   addButton.addEventListener("click", addToCart);
 }
 
-export default async function productDetails(productId) {
+function shuffleArray(items) {
+  const copy = [...items];
+
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+
+  return copy;
+}
+
+function recommendationCardTemplate(item, category) {
+  return `
+    <li class="product-card recommendation-card">
+      <a
+        class="product-card__link"
+        href="../product_pages/index.html?product=${item.Id}&category=${category}"
+      >
+        <img
+          src="${fixImageUrl(item.Images?.PrimaryLarge || item.Image)}"
+          alt="${item.Name}"
+        />
+        <h3 class="card__brand">${item.Brand?.Name || ""}</h3>
+        <h2 class="card__name">${item.NameWithoutBrand || item.Name}</h2>
+        <p class="product-card__price">$${Number(item.FinalPrice).toFixed(2)}</p>
+      </a>
+    </li>
+  `;
+}
+
+function renderRecommendations(products) {
+  const section = document.querySelector("#recommendedProductsSection");
+  const list = document.querySelector("#recommendedProductsList");
+
+  if (!section || !list || !products.length) return;
+
+  const html = products
+    .map((item) => recommendationCardTemplate(item, item._category || "tents"))
+    .join("");
+
+  list.innerHTML = html;
+  section.hidden = false;
+}
+
+async function loadRecommendations(productId, category) {
+  try {
+    const categories = ["tents", "backpacks", "sleeping-bags", "hammocks"];
+
+    const results = await Promise.all(
+      categories.map(async (categoryName) => {
+        try {
+          const products = await externalServices.getProductsByCategory(categoryName);
+          return products.map((item) => ({
+            ...item,
+            _category: categoryName
+          }));
+        } catch (error) {
+          console.error(`Could not load products for ${categoryName}`, error);
+          return [];
+        }
+      })
+    );
+
+    const allProducts = results.flat();
+
+    const filteredProducts = allProducts.filter(
+      (item) => String(item.Id) !== String(productId)
+    );
+
+    if (!filteredProducts.length) return;
+
+    const randomizedProducts = shuffleArray(filteredProducts);
+    const recommendations = randomizedProducts.slice(0, 3);
+
+    renderRecommendations(recommendations);
+  } catch (error) {
+    console.error("Could not load recommendations.", error);
+  }
+}
+
+export default async function productDetails(productId, category = "tents") {
   product = await externalServices.findProductById(productId);
   renderProductDetails();
+  await loadRecommendations(productId, category);
 }

@@ -23,7 +23,7 @@ async function init() {
   const category = getParam("category") || "tents";
 
   updateBreadcrumb(category);
-  productDetails(productId);
+  productDetails(productId, category);
 }
 
 init();
