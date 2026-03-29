@@ -94,7 +94,9 @@ function renderProductDetails() {
   }
 
   const addButton = document.querySelector("#addToCart");
-  addButton.addEventListener("click", addToCart);
+  if (addButton) {
+    addButton.addEventListener("click", addToCart);
+  }
 }
 
 function shuffleArray(items) {
@@ -141,7 +143,7 @@ function renderRecommendations(products) {
   section.hidden = false;
 }
 
-async function loadRecommendations(productId, category) {
+async function loadRecommendations(productId) {
   try {
     const categories = ["tents", "backpacks", "sleeping-bags", "hammocks"];
 
@@ -177,8 +179,89 @@ async function loadRecommendations(productId, category) {
   }
 }
 
+function getCommentsKey(productId) {
+  return `so-comments-${productId}`;
+}
+
+function getComments(productId) {
+  return getLocalStorage(getCommentsKey(productId)) || [];
+}
+
+function saveComments(productId, comments) {
+  setLocalStorage(getCommentsKey(productId), comments);
+}
+
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function commentTemplate(comment) {
+  return `
+    <article class="comment-card">
+      <div class="comment-card__header">
+        <h3 class="comment-card__name">${escapeHtml(comment.name)}</h3>
+        <p class="comment-card__date">${escapeHtml(comment.date)}</p>
+      </div>
+      <p class="comment-card__text">${escapeHtml(comment.text)}</p>
+    </article>
+  `;
+}
+
+function renderComments(productId) {
+  const commentsList = document.querySelector("#commentsList");
+  if (!commentsList) return;
+
+  const comments = getComments(productId);
+
+  if (!comments.length) {
+    commentsList.innerHTML =
+      `<p class="comments-empty">No comments yet. Be the first to add one.</p>`;
+    return;
+  }
+
+  commentsList.innerHTML = comments
+    .slice()
+    .reverse()
+    .map(commentTemplate)
+    .join("");
+}
+
+function setupComments(productId) {
+  const form = document.querySelector("#commentForm");
+  if (!form) return;
+
+  renderComments(productId);
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const nameInput = document.querySelector("#commentName");
+    const textInput = document.querySelector("#commentText");
+
+    const name = nameInput?.value.trim() || "";
+    const text = textInput?.value.trim() || "";
+
+    if (!name || !text) return;
+
+    const comments = getComments(productId);
+
+    comments.push({
+      name,
+      text,
+      date: new Date().toLocaleDateString()
+    });
+
+    saveComments(productId, comments);
+    form.reset();
+    renderComments(productId);
+  });
+}
+
 export default async function productDetails(productId, category = "tents") {
   product = await externalServices.findProductById(productId);
   renderProductDetails();
   await loadRecommendations(productId, category);
+  setupComments(productId);
 }

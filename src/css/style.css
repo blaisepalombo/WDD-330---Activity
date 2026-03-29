@@ -1156,3 +1156,78 @@ body.modal-open {
 .recommendation-card {
   max-width: 220px;
 }
+
+.product-comments {
+  max-width: 1080px;
+  margin: 2rem auto 0;
+  padding: 1rem;
+}
+
+.product-comments h2 {
+  margin-bottom: 1rem;
+}
+
+.comment-form {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  max-width: 700px;
+}
+
+.comment-form label {
+  font-weight: bold;
+  margin-bottom: -0.35rem;
+}
+
+.comment-form input,
+.comment-form textarea {
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--light-grey);
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.comment-form textarea {
+  resize: vertical;
+}
+
+.comments-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.comments-empty {
+  margin: 0;
+}
+
+.comment-card {
+  border: 1px solid var(--light-grey);
+  padding: 1rem;
+  background: white;
+}
+
+.comment-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.comment-card__name {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.comment-card__date {
+  margin: 0;
+  font-size: var(--small-font);
+  color: #666;
+}
+
+.comment-card__text {
+  margin: 0;
+  white-space: pre-wrap;
+}
