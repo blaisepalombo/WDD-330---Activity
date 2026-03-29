@@ -5,8 +5,13 @@ import {
   updateCartCount,
   animateCartIcon
 } from "./utils.mjs";
+import {
+  isInWishlist,
+  toggleWishlist
+} from "./wishlist.mjs";
 
 let product = {};
+let currentCategory = "tents";
 
 function fixImageUrl(url) {
   if (!url) return "";
@@ -33,28 +38,52 @@ function getDiscount(productToCheck) {
   };
 }
 
+function buildStoredProduct(productToStore) {
+  return {
+    ...productToStore,
+    _category: currentCategory
+  };
+}
+
 function addProductToCart(productToAdd) {
   const cartItems = getLocalStorage("so-cart") || [];
+  const storedProduct = buildStoredProduct(productToAdd);
 
   const existingIndex = cartItems.findIndex(
-    (item) => item.Id === productToAdd.Id
+    (item) => item.Id === storedProduct.Id
   );
 
   if (existingIndex !== -1) {
     const currentQty = Number(cartItems[existingIndex].quantity) || 1;
     cartItems[existingIndex].quantity = currentQty + 1;
   } else {
-    const newItem = { ...productToAdd, quantity: 1 };
-    cartItems.push(newItem);
+    cartItems.push({
+      ...storedProduct,
+      quantity: 1
+    });
   }
 
   setLocalStorage("so-cart", cartItems);
+}
+
+function updateWishlistButton() {
+  const wishlistButton = document.querySelector("#addToWishlist");
+  if (!wishlistButton) return;
+
+  wishlistButton.textContent = isInWishlist(product.Id)
+    ? "Remove from Wishlist"
+    : "Add to Wishlist";
 }
 
 function addToCart() {
   addProductToCart(product);
   updateCartCount();
   animateCartIcon();
+}
+
+function handleWishlistToggle() {
+  toggleWishlist(buildStoredProduct(product));
+  updateWishlistButton();
 }
 
 function renderProductDetails() {
@@ -96,6 +125,12 @@ function renderProductDetails() {
   const addButton = document.querySelector("#addToCart");
   if (addButton) {
     addButton.addEventListener("click", addToCart);
+  }
+
+  const wishlistButton = document.querySelector("#addToWishlist");
+  if (wishlistButton) {
+    wishlistButton.addEventListener("click", handleWishlistToggle);
+    updateWishlistButton();
   }
 }
 
@@ -260,8 +295,9 @@ function setupComments(productId) {
 }
 
 export default async function productDetails(productId, category = "tents") {
+  currentCategory = category;
   product = await externalServices.findProductById(productId);
   renderProductDetails();
-  await loadRecommendations(productId, category);
+  await loadRecommendations(productId);
   setupComments(productId);
 }

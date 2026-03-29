@@ -3,15 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sleep Outside | Product Details</title>
+    <title>Sleep Outside | Product Detail</title>
     <link rel="stylesheet" href="../css/style.css" />
     <script src="../js/product.js" type="module"></script>
   </head>
-
   <body>
     <header class="divider" id="main-header"></header>
 
-    <!-- Breadcrumb -->
     <div class="breadcrumb-wrapper">
       <p class="breadcrumb" id="breadcrumb"></p>
     </div>
@@ -25,8 +23,10 @@
         <p class="product__color" id="productColorName"></p>
         <p id="productDiscount"></p>
         <p class="product__description" id="productDescriptionHtmlSimple"></p>
-        <div class="product-detail__add">
+
+        <div class="product-detail__actions">
           <button id="addToCart" data-id="">Add to Cart</button>
+          <button id="addToWishlist" type="button">Add to Wishlist</button>
         </div>
       </section>
 
@@ -36,8 +36,12 @@
         hidden
       >
         <h2>Other Gear to Consider</h2>
-        <ul class="product-list recommended-products__list" id="recommendedProductsList"></ul>
+        <ul
+          class="product-list recommended-products__list"
+          id="recommendedProductsList"
+        ></ul>
       </section>
+
       <section class="product-comments" id="productCommentsSection">
         <h2>Customer Comments</h2>
 
@@ -60,7 +64,7 @@
         <div class="comments-list" id="commentsList">
           <p class="comments-empty">No comments yet. Be the first to add one.</p>
         </div>
-      </section>      
+      </section>
     </main>
 
     <footer id="main-footer"></footer>

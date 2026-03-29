@@ -1278,3 +1278,69 @@ body.modal-open {
 .auth-switch {
   margin-top: 1rem;
 }
+
+.header-wishlist {
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.header-wishlist:hover {
+  text-decoration: underline;
+}
+
+.product-detail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.product-detail__actions button {
+  margin: 0;
+}
+
+.wishlist-page {
+  padding: 1rem 0.5rem 2rem;
+}
+
+.wishlist-list {
+  gap: 1rem;
+  justify-content: flex-start;
+}
+
+.wishlist-card {
+  max-width: 260px;
+}
+
+.wishlist-card__category {
+  color: var(--secondary-color);
+  font-size: var(--small-font);
+  text-transform: capitalize;
+}
+
+.wishlist-card__actions {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.75rem;
+}
+
+.wishlist-card__actions button {
+  width: 100%;
+  margin: 0;
+}
+
+.wishlist-remove-button {
+  background: white;
+  color: var(--secondary-color);
+  border: 1px solid var(--secondary-color);
+}
+
+@media screen and (max-width: 699px) {
+  .header-actions {
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+}
