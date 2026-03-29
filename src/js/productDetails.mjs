@@ -5,15 +5,14 @@ import {
   updateCartCount,
   animateCartIcon
 } from "./utils.mjs";
-import {
-  isInWishlist,
-  toggleWishlist
-} from "./wishlist.mjs";
+import { isInWishlist, toggleWishlist } from "./wishlist.mjs";
 
 let product = {};
 let currentCategory = "tents";
 let productImages = [];
+let baseProductImages = [];
 let currentImageIndex = 0;
+let selectedColorIndex = 0;
 
 function fixImageUrl(url) {
   if (!url) return "";
@@ -40,10 +39,22 @@ function getDiscount(productToCheck) {
   };
 }
 
+function getSelectedColor() {
+  if (!Array.isArray(product.Colors) || !product.Colors.length) {
+    return null;
+  }
+
+  return product.Colors[selectedColorIndex] || product.Colors[0];
+}
+
 function buildStoredProduct(productToStore) {
+  const selectedColor = getSelectedColor();
+
   return {
     ...productToStore,
-    _category: currentCategory
+    _category: currentCategory,
+    selectedColorName: selectedColor?.ColorName || "",
+    selectedColorCode: selectedColor?.ColorCode || ""
   };
 }
 
@@ -52,7 +63,9 @@ function addProductToCart(productToAdd) {
   const storedProduct = buildStoredProduct(productToAdd);
 
   const existingIndex = cartItems.findIndex(
-    (item) => item.Id === storedProduct.Id
+    (item) =>
+      item.Id === storedProduct.Id &&
+      (item.selectedColorCode || "") === (storedProduct.selectedColorCode || "")
   );
 
   if (existingIndex !== -1) {
@@ -118,7 +131,7 @@ function collectProductImages(productToRender) {
     });
   }
 
-  return images.filter(Boolean);
+  return [...new Set(images.filter(Boolean))];
 }
 
 function renderActiveImage() {
@@ -133,9 +146,11 @@ function renderActiveImage() {
   img.alt = `${product.Name} image ${currentImageIndex + 1}`;
 
   if (thumbsContainer) {
-    thumbsContainer.querySelectorAll(".product-image-thumb").forEach((button, index) => {
-      button.classList.toggle("active", index === currentImageIndex);
-    });
+    thumbsContainer
+      .querySelectorAll(".product-image-thumb")
+      .forEach((button, index) => {
+        button.classList.toggle("active", index === currentImageIndex);
+      });
   }
 
   const hasMultipleImages = productImages.length > 1;
@@ -175,16 +190,89 @@ function renderImageThumbs() {
     )
     .join("");
 
-  thumbsContainer.querySelectorAll(".product-image-thumb").forEach((button) => {
-    button.addEventListener("click", () => {
-      currentImageIndex = Number(button.dataset.index);
-      renderActiveImage();
+  thumbsContainer
+    .querySelectorAll(".product-image-thumb")
+    .forEach((button) => {
+      button.addEventListener("click", () => {
+        currentImageIndex = Number(button.dataset.index);
+        renderActiveImage();
+      });
     });
-  });
+}
+
+function getColorSwatchUrl(color) {
+  return fixImageUrl(
+    color?.ColorSwatchImage ||
+      color?.ColorSwatchImageSrc ||
+      color?.ColorChipImage ||
+      color?.ColorChipImageSrc ||
+      color?.SwatchImage ||
+      color?.SwatchImageSrc ||
+      color?.ColorPreviewImage ||
+      color?.ColorPreviewImageSrc ||
+      color?.ColorImage ||
+      color?.Image ||
+      color?.Thumbnail ||
+      color?.Src ||
+      color?.Url
+  );
+}
+
+function getColorSuffix(color) {
+  if (color?.ColorCode) {
+    const match = color.ColorCode.match(/(\d{2})$/);
+    if (match) return match[1];
+  }
+
+  const swatchUrl = getColorSwatchUrl(color);
+  const match = swatchUrl.match(/-(\d{2})\.(jpg|jpeg|png|webp)$/i);
+  return match ? match[1] : "";
+}
+
+function swapImageColorSuffix(url, newSuffix) {
+  return url.replace(/(~p~[^~]+_)(\d{2})(~\d+\.[a-z]+)$/i, `$1${newSuffix}$3`);
+}
+
+function preloadImages(urls) {
+  return Promise.all(
+    urls.map(
+      (url) =>
+        new Promise((resolve) => {
+          const img = new Image();
+
+          img.onload = () => resolve({ url, ok: true });
+          img.onerror = () => resolve({ url, ok: false });
+
+          img.src = url;
+        })
+    )
+  );
+}
+
+async function swapImagesForSelectedColor() {
+  const selectedColor = getSelectedColor();
+  const newSuffix = getColorSuffix(selectedColor);
+
+  if (!newSuffix || !baseProductImages.length) {
+    return;
+  }
+
+  const candidateImages = baseProductImages.map((url) =>
+    swapImageColorSuffix(url, newSuffix)
+  );
+
+  const results = await preloadImages(candidateImages);
+  const allWorked = results.every((result) => result.ok);
+
+  productImages = allWorked ? candidateImages : [...baseProductImages];
+  currentImageIndex = 0;
+  renderImageThumbs();
+  renderActiveImage();
 }
 
 function setupImageCarousel() {
   productImages = collectProductImages(product);
+  baseProductImages = [...productImages];
   currentImageIndex = 0;
 
   renderImageThumbs();
@@ -211,6 +299,62 @@ function setupImageCarousel() {
   }
 }
 
+function renderColorOptions() {
+  const selector = document.querySelector("#productColorSelector");
+  const colorName = document.querySelector("#productColorName");
+  const swatches = document.querySelector("#productColorSwatches");
+
+  if (!selector || !colorName || !swatches) return;
+
+  const colors = Array.isArray(product.Colors) ? product.Colors : [];
+  const selectedColor = getSelectedColor();
+
+  colorName.textContent = selectedColor?.ColorName
+    ? `Color: ${selectedColor.ColorName}`
+    : "";
+
+  if (colors.length <= 1) {
+    selector.hidden = !selectedColor?.ColorName;
+    swatches.innerHTML = "";
+    return;
+  }
+
+  selector.hidden = false;
+
+  swatches.innerHTML = colors
+    .map((color, index) => {
+      const swatchUrl = getColorSwatchUrl(color);
+
+      return `
+        <button
+          type="button"
+          class="product-color-swatch ${index === selectedColorIndex ? "active" : ""}"
+          data-color-index="${index}"
+          aria-label="Select ${color.ColorName || `color ${index + 1}`}"
+          aria-pressed="${index === selectedColorIndex}"
+          title="${color.ColorName || ""}"
+        >
+          ${
+            swatchUrl
+              ? `<img src="${swatchUrl}" alt="${color.ColorName || `Color ${index + 1}`}" />`
+              : `<span class="product-color-swatch__fallback">${
+                  color.ColorName?.charAt(0)?.toUpperCase() || index + 1
+                }</span>`
+          }
+        </button>
+      `;
+    })
+    .join("");
+
+  swatches.querySelectorAll(".product-color-swatch").forEach((button) => {
+    button.addEventListener("click", async () => {
+      selectedColorIndex = Number(button.dataset.colorIndex) || 0;
+      renderColorOptions();
+      await swapImagesForSelectedColor();
+    });
+  });
+}
+
 function renderProductDetails() {
   document.querySelector("#productName").textContent = product.Brand.Name;
   document.querySelector("#productNameWithoutBrand").textContent =
@@ -218,11 +362,11 @@ function renderProductDetails() {
 
   setupImageCarousel();
 
-  document.querySelector("#productFinalPrice").textContent =
-    `$${Number(product.FinalPrice).toFixed(2)}`;
+  document.querySelector("#productFinalPrice").textContent = `$${Number(
+    product.FinalPrice
+  ).toFixed(2)}`;
 
-  document.querySelector("#productColorName").textContent =
-    product.Colors?.[0]?.ColorName || "";
+  renderColorOptions();
 
   document.querySelector("#productDescriptionHtmlSimple").innerHTML =
     product.DescriptionHtmlSimple;
@@ -233,8 +377,7 @@ function renderProductDetails() {
 
     if (discount) {
       discountElement.className = "discount-tag discount-tag-detail";
-      discountElement.textContent =
-        `Save $${discount.amountOff} (${discount.percentOff}% off) • Was $${discount.original}`;
+      discountElement.textContent = `Save $${discount.amountOff} (${discount.percentOff}% off) • Was $${discount.original}`;
       discountElement.style.display = "inline-block";
     } else {
       discountElement.textContent = "";
@@ -279,7 +422,9 @@ function recommendationCardTemplate(item, category) {
         />
         <h3 class="card__brand">${item.Brand?.Name || ""}</h3>
         <h2 class="card__name">${item.NameWithoutBrand || item.Name}</h2>
-        <p class="product-card__price">$${Number(item.FinalPrice).toFixed(2)}</p>
+        <p class="product-card__price">$${Number(item.FinalPrice).toFixed(
+          2
+        )}</p>
       </a>
     </li>
   `;
@@ -306,7 +451,9 @@ async function loadRecommendations(productId) {
     const results = await Promise.all(
       categories.map(async (categoryName) => {
         try {
-          const products = await externalServices.getProductsByCategory(categoryName);
+          const products = await externalServices.getProductsByCategory(
+            categoryName
+          );
           return products.map((item) => ({
             ...item,
             _category: categoryName
@@ -418,6 +565,7 @@ function setupComments(productId) {
 export default async function productDetails(productId, category = "tents") {
   currentCategory = category;
   product = await externalServices.findProductById(productId);
+  selectedColorIndex = 0;
   renderProductDetails();
   await loadRecommendations(productId);
   setupComments(productId);

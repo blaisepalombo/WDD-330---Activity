@@ -22,9 +22,17 @@ function getItemImage(item) {
   return "/images/tent.svg";
 }
 
-function removeFromCart(productId) {
+function findCartItemIndex(cartItems, productId, colorCode = "") {
+  return cartItems.findIndex(
+    (item) =>
+      String(item.Id) === String(productId) &&
+      String(item.selectedColorCode || "") === String(colorCode || "")
+  );
+}
+
+function removeFromCart(productId, colorCode = "") {
   const cartItems = getLocalStorage("so-cart") || [];
-  const itemIndex = cartItems.findIndex((item) => item.Id === productId);
+  const itemIndex = findCartItemIndex(cartItems, productId, colorCode);
 
   if (itemIndex !== -1) {
     cartItems.splice(itemIndex, 1);
@@ -35,9 +43,9 @@ function removeFromCart(productId) {
   updateCartCount();
 }
 
-function changeQuantity(productId, amount) {
+function changeQuantity(productId, colorCode = "", amount) {
   const cartItems = getLocalStorage("so-cart") || [];
-  const itemIndex = cartItems.findIndex((item) => item.Id === productId);
+  const itemIndex = findCartItemIndex(cartItems, productId, colorCode);
 
   if (itemIndex === -1) return;
 
@@ -63,21 +71,24 @@ function addCartActionListeners() {
   removeButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const productId = button.dataset.id;
-      removeFromCart(productId);
+      const colorCode = button.dataset.colorCode || "";
+      removeFromCart(productId, colorCode);
     });
   });
 
   decreaseButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const productId = button.dataset.id;
-      changeQuantity(productId, -1);
+      const colorCode = button.dataset.colorCode || "";
+      changeQuantity(productId, colorCode, -1);
     });
   });
 
   increaseButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const productId = button.dataset.id;
-      changeQuantity(productId, 1);
+      const colorCode = button.dataset.colorCode || "";
+      changeQuantity(productId, colorCode, 1);
     });
   });
 }
@@ -107,10 +118,19 @@ function cartItemTemplate(item) {
   const qty = Number(item.quantity || 1);
   const itemPrice = Number(item.FinalPrice).toFixed(2);
   const lineTotal = (Number(item.FinalPrice) * qty).toFixed(2);
+  const colorName = item.selectedColorName || item.Colors?.[0]?.ColorName || "";
+  const colorCode = item.selectedColorCode || "";
 
   return `
     <li class="cart-card divider">
-      <button class="remove-item" data-id="${item.Id}" aria-label="Remove ${item.Name}">×</button>
+      <button
+        class="remove-item"
+        data-id="${item.Id}"
+        data-color-code="${colorCode}"
+        aria-label="Remove ${item.Name}"
+      >
+        ×
+      </button>
 
       <a href="../product_pages/index.html?product=${item.Id}" class="cart-card__image">
         <img src="${getItemImage(item)}" alt="${item.Name}" />
@@ -120,12 +140,13 @@ function cartItemTemplate(item) {
         <h2 class="card__name">${item.Name}</h2>
       </a>
 
-      <p class="cart-card__color">${item.Colors?.[0]?.ColorName || ""}</p>
+      <p class="cart-card__color">${colorName ? `Color: ${colorName}` : ""}</p>
 
       <div class="cart-card__quantity">
         <button
           class="quantity-button quantity-decrease"
           data-id="${item.Id}"
+          data-color-code="${colorCode}"
           aria-label="Decrease quantity of ${item.Name}"
           type="button"
         >
@@ -135,6 +156,7 @@ function cartItemTemplate(item) {
         <button
           class="quantity-button quantity-increase"
           data-id="${item.Id}"
+          data-color-code="${colorCode}"
           aria-label="Increase quantity of ${item.Name}"
           type="button"
         >

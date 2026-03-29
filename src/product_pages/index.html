@@ -27,7 +27,14 @@
             aria-label="Previous product image"
           >
             <svg viewBox="0 0 24 24" width="18" height="18">
-              <path d="M15 6l-6 6 6 6" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path
+                d="M15 6l-6 6 6 6"
+                fill="none"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
 
@@ -40,7 +47,14 @@
             aria-label="Next product image"
           >
             <svg viewBox="0 0 24 24" width="18" height="18">
-              <path d="M9 6l6 6-6 6" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path
+                d="M9 6l6 6-6 6"
+                fill="none"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
         </div>
@@ -48,7 +62,12 @@
         <div class="product-image-thumbs hide" id="productImageThumbs"></div>
 
         <p class="product-card__price" id="productFinalPrice"></p>
-        <p class="product__color" id="productColorName"></p>
+
+        <div class="product-color-selector" id="productColorSelector" hidden>
+          <p class="product__color" id="productColorName"></p>
+          <div class="product-color-swatches" id="productColorSwatches"></div>
+        </div>
+
         <p id="productDiscount"></p>
         <p class="product__description" id="productDescriptionHtmlSimple"></p>
 
